@@ -1,0 +1,213 @@
+\documentclass[11pt,a4paper,english]{article}
+\usepackage[english]{babel} % Using babel for norwegian hyphenation
+\usepackage{lmodern} % Changing the font
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+
+\usepackage{tcolorbox}
+\usepackage[parfill]{parskip} % Removes indents
+\usepackage{amsmath} % Environment, symbols etc...
+\usepackage{amssymb}
+\usepackage{float} % Fixing figure locations
+\usepackage{multirow} % For nice tables
+\usepackage{graphicx} % For pictures etc...
+\usepackage{enumitem} % Points/lists
+\usepackage{url}
+\usepackage{hyperref}
+
+\definecolor{red}{RGB}{255,10,10}
+
+% To include code(-snippets) with æøå
+\usepackage{listings}
+\lstset{
+language=c++,
+showspaces=false,
+showstringspaces=false,
+frame=l,
+}
+
+\tolerance = 5000 % Bedre tekst
+\hbadness = \tolerance
+\pretolerance = 2000
+
+\numberwithin{equation}{section}
+
+\newcommand{\conj}[1]{#1^*}
+\newcommand{\ve}[1]{\mathbf{#1}} % Vektorer i bold
+\let\oldhat\hat
+\renewcommand{\hat}[1]{\mathbf{\oldhat{#1}}}
+\newcommand{\trans}[1]{#1^\top}
+\newcommand{\herm}[1]{#1^\dagger}
+\newcommand{\Real}{\mathbb{R}}
+\newcommand{\bigO}[1]{\mathcal{O}\left( #1 \right)}
+
+\newcommand{\spac}{\hspace{5mm}}
+
+\title{UNIK4660 - Assignment 1}
+\author{Wilhelm Karlsen and Magnus Eden}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\section{Problem 1}
+\begin{align}
+	u &= -y \nonumber \\
+	v &=  x \nonumber \\
+	w &= zt \nonumber
+\end{align}
+We are given the velocity field above, in the right handed Cartesian coordinate system. Using this field, we are to show that, at $t = 0$, the stream lines are circles centered on the origin. 
+\\
+This can be done by using the dot products algebraic definition,
+$$ \bar{V} \bullet \bar{x} = \bar{V}_{1}\bar{x}_{1} + \bar{V}_{2}\bar{x}_{2} + \bar{V}_{3}\bar{x}_{3}$$
+where $\bar{V}$ is the velocity vector and $\bar{x}$ is the position vector from the origin.
+\\
+\\
+As $u$ and $v$ are independent of time and $w = 0$ when $t = 0$, we can ignore the third dimension in this problem.
+
+\begin{align*}
+	\bar{V} \bullet \bar{x} &= \bar{V}_{1}\bar{x}_{1} + \bar{V}_{2}\bar{x}_{2}	\\
+	\bar{V} \bullet \bar{x} &= -yx + xy	\\
+	\bar{V} \bullet \bar{x} &= 0
+\end{align*}
+This means that the velocity vector is always orthogonal to the position, which would be the angular velocity.
+
+?Further proff/explanation required?
+
+
+\section{Problem 2}
+We are to show that the streamlines are circles with center at the z-axis going through the point $(r, 0, z_{0})$.
+We are given the definition of $r$ as $r^2 = x^2 + y^2$, and given $tan \theta = \frac{y}{x}$.
+The streamlines can then be expressed by:
+\begin{align}
+	\frac{dx}{d\theta} &= -y \nonumber \\
+	\frac{dy}{d\theta} &=  x \nonumber \\
+	\frac{dz}{d\theta} &= zt \nonumber
+\end{align}
+
+As this problem is considered at $t=0$, the $z$ dimension is always 0 and can be ignored.
+This then becomes a two dimensional problem and we can use the definition of $r$ to find the position.
+\begin{align*}
+x &= \sqrt{r^2 - y^2}	& 
+y &= \sqrt{r^2 - x^2}
+\end{align*}
+
+This can then be inserted into the streamline equations, and since we are only concerned with the point $(r, 0, z_{0})$, we get:
+\begin{align*}
+	\frac{dx}{d\theta} &= -\sqrt{r^2 - x^2} &= -\sqrt{r^2 - r^2} &= 0 	\\
+	\frac{dy}{d\theta} &=  \sqrt{r^2 - y^2} &= -\sqrt{r^2 - 0^2} &= r	\\
+	\frac{dz}{d\theta} &=  0
+\end{align*}
+
+?What was the reason this was proof enough!
+
+No streamline that starts at $z > 0$ can cross $z = 0$ due to the ?
+
+\section{Problem 3}
+We are to find the formula for the streamline, $SL$, going through the point $P = (r, 0, w_{0})$, when the time $t > 0$. \\
+Using the result from problem 3, we see that the x and y 'elements' are independent of time and so the only change is that the $z$-dimension is no longer always 0. 
+We can write the formula as:
+$$ SL(x, y, z) = -\sqrt{r^2 - x^2} + \sqrt{r^2 - y^2} + zt$$
+and for the point $P$ this becomes:
+$$ SL(r, 0, w_{0}) = -\sqrt{r^2 - r^2} + \sqrt{r^2 - 0^2} + w_{0}t$$
+where r is the radius of the circle around on which z lies.
+\\
+The streamlines going through $(r, 0, 0)$ are the same as the ones found in problem 3, since when $z=0$ the $z$ 'element' becomes independent of time.
+
+\section{Problem 4}
+We are to find the path line, $PL$ for the velocity field, $\bar{u}$, given in problem 1, that goes through the point $P = (r, 0, z_{0})$ at $t=0$.
+\\
+The path lines are defined to be the trajectories of an individual particle in a fluid.
+Where the suffix $P$ is indicates a single particle and not the point $P$.
+\[ 
+\begin{cases} 
+   \frac{d\bar{x}}{dt} &= \bar{u}_{P}(\bar{x}_{P}, t)	\\
+   \bar{x}_{P}(t_{0})  &= \bar{x}_{P0}  
+\end{cases} 
+\]
+As $t=0 = t_{0}$, the path line is simply the position of the particle at $t=0$. To prove this we need to derive it from the velocity field at the specified point.
+\begin{align*}
+	\frac{dx}{dt} &= \bar{u_1} = -y 	\\	
+	dx &= -ydt						\\
+	\int_0^x dx &= \int_0^t -ydt	\\
+	x &= x_0 - yt
+\end{align*}
+
+\begin{align*}
+	\frac{dy}{dt} &= \bar{u_2} = x 	\\	
+	dy &= xdt						\\
+	\int_0^y dy &= \int_0^t xdt	\\
+	y &= xt + y_0
+\end{align*}
+
+\begin{align*}
+	\frac{dz}{dt} 			&= \bar{u_3} = zt 			\\	
+	\frac{dz}{z} 			&= tdt						\\
+	\int_0^y \frac{1}{z}dz 	&= \int_0^t tdt				\\
+	ln(\frac{z}{z_0}) 		&= \frac{1}{2}t^2			\\
+	z &= z_0 e^{\frac{1}{2}t^2}
+\end{align*}
+
+The path line can then be written as:
+$$PL(x, y, z, t) = (x_0 - yt)\hat{i} + (xt+y_0)\hat{j} + (z_0 e^{\frac{1}{2}t^2})\hat{k}$$
+The path line on point $P$ at As $t=0$ becomes:
+$$PL(r, 0, z_0, 0) = (x_0)\hat{i} + (y_0)\hat{j} + (z_0)\hat{k}$$
+
+\section{Problem 5}
+We are to find the expression for the streak lines emerging from the point $(r_0, 0, z_0)$. \\
+
+Streak lines are the curve connecting all particles that pass through a given point, $p$, from time $t_0 \leq s \leq t$, and is defined as $x = x(\xi[p,s],t)$.
+
+We derive an expression for the spatial coordinates from the velocity field given in the same way as we did in problem 4.
+\begin{align*}
+	\frac{dx}{dt} &= u	\\
+	x(x,y,z, t) &= (x_0-yt)\hat{i} + (y_0+xt)\hat{j} + (z_0e^{\frac{1}{2}t^2})\hat{k}
+\end{align*}
+We can replace the initial coordinates, $x_0$, $y_0$ and $z_0$, with the material coordinates $\xi_i$, since $\xi$ is equal to the initial spatial coordinates for each particle in the flow.
+$$x(x,y,z, t) = (\xi_1-yt)\hat{i} + (\xi_2+xt)\hat{j} + (\xi_3e^{\frac{1}{2}t^2})\hat{k}$$
+Reshuffling this gives us:
+\begin{equation} \label{eq:material}
+\xi_i = (x+yt)\hat{i} + (y-xt)\hat{j} + (ze^{-\frac{1}{2}t^2})\hat{k}
+\end{equation}
+
+The expression for the particle at position $p(x,y,z)$ and time $s$ is then:
+\begin{equation} \label{eq:positionP}
+\xi_i = (x+ys)\hat{i} + (y-xs)\hat{j} + (z^{-\frac{1}{2}s^2})\hat{k}
+\end{equation}
+The streak line expression is then found by inserting ~\eqref{eq:material} into ~\eqref{eq:positionP} and using the coordinates for the emerging point, $(r_o, 0, z_0)$:
+\begin{align*}
+	(x+yt)\hat{i} + (y-xt)\hat{j} + (ze^{-\frac{1}{2}t^2})\hat{k}
+		= 
+	(x+ys)\hat{i} + (y-xs)\hat{j} + (z^{-\frac{1}{2}s^2})\hat{k}
+\end{align*}
+\begin{align*}
+	x_1 &= r_0 	& 	
+	x_2 &= r_0t-r_0s	&	
+	x_3 &= z_0e^{\frac{1}{2}t^2 - \frac{1}{2}s^2}
+\end{align*}
+$$ Streak line = r_0\hat{i} + (r_0t-r_0s)\hat{j} + (z_0e^{\frac{1}{2}t^2 - \frac{1}{2}s^2})\hat{k} $$
+
+\section{Problem 6}
+Using the velocity field given in problem 1, we are to calculate the vorticity field.
+The vorticity field is defined as $\bigtriangledown \times \bar{v}$.
+This gives us:
+\begin{align*}
+	\bigtriangledown \times \bar{v} &= 		
+		\begin{vmatrix}
+			\bar{i} 	 & \bar{j} 		& \bar{k}			 		\\
+  			\frac{d}{dx} & \frac{d}{dy}	& \frac{d}{dz}				\\
+  			-y 			 & x 			& zt			 		
+		\end{vmatrix}
+		\\
+		&=  (\frac{dzt}{dy}-\frac{dx}{dz})\bar{i} + 
+			(\frac{dy}{dz}-\frac{dzt}{dx})\bar{j} + 
+			(\frac{dx}{dx}+\frac{dy}{dy})\bar{k}
+		\\
+		Vorticity &= 0\bar{i} + 0\bar{j} + 2\bar{k}
+\end{align*}
+
+\section{Problem 7}
+\section{Problem 8}
+We are to calculate the relative dilation following a particle path.
+
+\end{document}
