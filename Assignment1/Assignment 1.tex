@@ -207,7 +207,87 @@ This gives us:
 \end{align*}
 
 \section{Problem 7}
+
+Since 
+
+\[ \frac{\partial u_{i}}{\partial t_{j}}
+   = \frac{1}{2} \left( \frac{\partial u_i}{\partial x_j}
+      + \frac{\partial u_j}{\partial y_i}
+       \right) +
+       \frac{1}{2} \left( \frac{\partial u_i}{\partial x_j}
+      - \frac{\partial u_j}{\partial y_i}
+       \right) = 
+       s_{ij} + \frac{1}{2}\omega_{ij}\]
+       
+and 
+
+\[\omega_{ij}= 
+\frac{1}{2} \left( \frac{\partial u_i}{\partial x_j}
+      - \frac{\partial u_j}{\partial y_i}
+       \right)\]
+       
+we can find the strain rate tensor by simply expanding the tensor formula and solving for it using our two vectors given by the velocity field
+\[\vec{x}= <x, y, z>\] \[\vec{u}=<-y, x, zt>\]
+
+\[s_{ij}=
+\begin{bmatrix}
+       \frac{\partial -y}{\partial x} & 
+       \frac{1}{2}(\frac{\partial x}{\partial x} + \frac{\partial -y}{\partial y}) & 
+       \frac{1}{2}(\frac{\partial zt}{\partial x} + \frac{\partial -y}{\partial z}) \\[0.3em]
+       
+       \frac{1}{2}(\frac{\partial -y}{\partial y} + \frac{\partial x}{\partial x}) & 
+       \frac{\partial x}{\partial y} & 
+       \frac{1}{2}(\frac{\partial zt}{\partial y} + \frac{\partial x}{\partial z}) \\[0.3em]
+       
+       \frac{1}{2}(\frac{\partial -y}{\partial z} + \frac{\partial zt}{\partial x}) & 
+       \frac{1}{2}(\frac{\partial x}{\partial z} + \frac{\partial zt}{\partial y}) & 
+       \frac{\partial zt}{\partial z} \\[0.3em]
+     \end{bmatrix}
+     =\begin{bmatrix}
+       0 & 
+       0 & 
+       0\\[0.3em]
+       
+       0 & 
+       0 & 
+       0\\[0.3em]
+       
+       0 & 
+       0 & 
+       t\\[0.3em]
+     \end{bmatrix}\]
+     
+The rotation tensor can similarly be found using the same method.     
+     
+     \[\omega_{ij}=
+\begin{bmatrix}
+       \frac{\partial -y}{\partial x} - \frac{\partial -y}{\partial x} & 
+       \frac{1}{2}(\frac{\partial x}{\partial x} - \frac{\partial -y}{\partial y}) & 
+       \frac{1}{2}(\frac{\partial zt}{\partial x} - \frac{\partial -y}{\partial z}) \\[0.3em]
+       
+       \frac{1}{2}(\frac{\partial -y}{\partial y} - \frac{\partial x}{\partial x}) & 
+       \frac{\partial x}{\partial y} - \frac{\partial x}{\partial y} & 
+       \frac{1}{2}(\frac{\partial zt}{\partial y} - \frac{\partial x}{\partial z}) \\[0.3em]
+      
+       \frac{1}{2}(\frac{\partial -y}{\partial z} - \frac{\partial zt}{\partial x}) & 
+       \frac{1}{2}(\frac{\partial x}{\partial z} - \frac{\partial zt}{\partial y}) & 
+       \frac{\partial zt}{\partial z} - \frac{\partial zt}{\partial z} \\[0.3em]
+     \end{bmatrix}
+     =\begin{bmatrix}
+       0 & 
+       2 & 
+       0\\[0.3em]
+       
+       -2 & 
+       0 & 
+       0\\[0.3em]
+       
+       0 & 
+       0 & 
+       0\\[0.3em]
+     \end{bmatrix}\]
+
 \section{Problem 8}
-We are to calculate the relative dilation following a particle path.
+We are to calculate the relative dilitation following a particle path.
 
 \end{document}
