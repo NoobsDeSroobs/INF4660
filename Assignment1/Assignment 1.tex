@@ -238,15 +238,15 @@ We can find the strain rate tensor by simply expanding the tensor formula and so
 	e_{ij}=
 	\begin{bmatrix}
     	   -\frac{\partial y}{\partial x} & 
-	       \frac{1}{2}(\frac{\partial x}{\partial x} - \frac{\partial y}{\partial y}) & 
-	       \frac{1}{2}(\frac{\partial (zt)}{\partial x} - \frac{\partial y}{\partial z}) \\[0.3em]
+	       \frac{1}{2}(- \frac{\partial y}{\partial y} + \frac{\partial x}{\partial x}) & 
+	       \frac{1}{2}(- \frac{\partial y}{\partial z} + \frac{\partial (zt)}{\partial x}) \\[0.3em]
        
-  	     \frac{1}{2}(-\frac{\partial y}{\partial y} + \frac{\partial x}{\partial x}) & 
+  	     \frac{1}{2}(\frac{\partial x}{\partial x} - \frac{\partial y}{\partial y}) & 
   	     \frac{\partial x}{\partial y} & 
-  	     \frac{1}{2}(\frac{\partial (zt)}{\partial y} + \frac{\partial x}{\partial z}) \\[0.3em]
+  	     \frac{1}{2}(\frac{\partial x}{\partial z} + \frac{\partial (zt)}{\partial y}) \\[0.3em]
        
-  	     \frac{1}{2}(-\frac{\partial y}{\partial z} + \frac{\partial (zt)}{\partial x}) & 
-  	     \frac{1}{2}(\frac{\partial x}{\partial z} + \frac{\partial (zt)}{\partial y}) & 
+  	     \frac{1}{2}(\frac{\partial (zt)}{\partial x} - \frac{\partial y}{\partial z}) & 
+  	     \frac{1}{2}(\frac{\partial (zt)}{\partial y} + \frac{\partial x}{\partial z}) & 
   	     \frac{\partial (zt)}{\partial z} \\[0.3em]
      \end{bmatrix}     
      =\begin{bmatrix}
