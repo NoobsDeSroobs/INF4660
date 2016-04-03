@@ -173,25 +173,27 @@ Reshuffling this gives us:
 
 The expression for the material coordinate of the particle at position $P(x_P,y_P,z_P)$ and time $s$ is then:
 \begin{equation} \label{eq:positionP}
-\xi_i(x_P,y_P,z_P,s) = (x_P+y_Ps)\hat{i} + (y_P-x_Ps)\hat{j} + (z_P^{-\frac{1}{2}s^2})\hat{k}
+\xi_i(x_P,y_P,z_P,s) = (x_P+y_Ps)\hat{i} + (y_P-x_Ps)\hat{j} + (z_Pe^{-\frac{1}{2}s^2})\hat{k}
 \end{equation}
 The streak line expression is then found by inserting ~\eqref{eq:material} into ~\eqref{eq:positionP} and using the coordinates for the given point, $(r_o, 0, z_0)$:
 \begin{align*}
 	(x+yt)\hat{i} + (y-xt)\hat{j} + (ze^{-\frac{1}{2}t^2})\hat{k}
 		= 
-	(x_P+y_Ps)\hat{i} + (y_P-x_Ps)\hat{j} + (z_P^{-\frac{1}{2}s^2})\hat{k}
+	(x_P+y_Ps)\hat{i} + (y_P-x_Ps)\hat{j} + (z_Pe^{-\frac{1}{2}s^2})\hat{k}
 \end{align*}
+This gives us the equations below for the $x, y, z$-components respectively.
 \begin{align*}
 	x+yt &= x_P+y_Ps 			& 	
 	y-xt &= y_P-x_Ps			&	
-	ze^{-\frac{1}{2}t^2} &= z_P^{-\frac{1}{2}s^2}
+	ze^{-\frac{1}{2}t^2} &= z_Pe^{-\frac{1}{2}s^2}
 \end{align*}
+The $x$ and $y$ component can be found by using substitution. Substituting $x$ into $y$ gives the following result:
 \begin{align*}
-	x_1 &= r_0 	& 	
-	x_2 &= r_0t-r_0s	&	
-	x_3 &= z_0e^{\frac{1}{2}t^2 - \frac{1}{2}s^2}
+	x &= r_0 -\frac{(r_0t - r_0s)t}{1-t^2} 	& 	
+	y &= \frac{r_0t-r_0s}{1+t^2}				&	
+	z &= z_0e^{\frac{1}{2}t^2 - \frac{1}{2}s^2}
 \end{align*}
-$$ Streak line = r_0\hat{i} + (r_0t-r_0s)\hat{j} + (z_0e^{\frac{1}{2}t^2 - \frac{1}{2}s^2})\hat{k} $$
+$$ Streak line = (r_0 -\frac{(r_0t - r_0s)t}{1-t^2})\hat{i} + (\frac{r_0t-r_0s}{1+t^2})\hat{j} + (z_0e^{\frac{1}{2}t^2 - \frac{1}{2}s^2})\hat{k} $$
 
 \section{Problem 6}
 Using the velocity field given in problem 1, we are to calculate the vorticity field.
@@ -304,6 +306,5 @@ The calculation becomes:
 	&= 0 + 0 + t
 \end{align*}
 
-Using the relative dilatation path given by Kundu which is 
 
 \end{document}
