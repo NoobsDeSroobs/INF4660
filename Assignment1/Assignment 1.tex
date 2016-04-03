@@ -44,7 +44,7 @@ frame=l,
 \newcommand{\spac}{\hspace{5mm}}
 
 \title{UNIK4660 - Assignment 1}
-\author{Wilhelm Karlsen and Magnus Eden}
+\author{Wilhelm Karlsen and Magnus Elden}
 \date{\today}
 
 \begin{document}
@@ -70,10 +70,8 @@ As $u$ and $v$ are independent of time and $w = 0$ when $t = 0$, we can ignore t
 	\bar{V} \bullet \bar{x} &= -yx + xy	\\
 	\bar{V} \bullet \bar{x} &= 0
 \end{align*}
-This means that the velocity vector is always orthogonal to the position, which would be the angular velocity.
 
-?Further proff/explanation required?
-
+Since for any point the velocity field is orthogonal to the position vector any particle following this flow will never increase or decrease its distance to the z-axis. Thus, since we have a constant radius we can conclude that at $t = 0$, and for any $t$, the streamline is a circle around the z-axis.
 
 \section{Problem 2}
 We are to show that the streamlines are circles with center at the z-axis going through the point $(r, 0, z_{0})$.
@@ -88,8 +86,8 @@ The streamlines can then be expressed by:
 As this problem is considered at $t=0$, the $z$ dimension is always 0 and can be ignored.
 This then becomes a two dimensional problem and we can use the definition of $r$ to find the position.
 \begin{align*}
-x &= \sqrt{r^2 - y^2}	& 
-y &= \sqrt{r^2 - x^2}
+	x &= \sqrt{r^2 - y^2}	& 
+	y &= \sqrt{r^2 - x^2}
 \end{align*}
 
 This can then be inserted into the streamline equations, and since we are only concerned with the point $(r, 0, z_{0})$, we get:
@@ -98,34 +96,36 @@ This can then be inserted into the streamline equations, and since we are only c
 	\frac{dy}{d\theta} &=  \sqrt{r^2 - y^2} &= -\sqrt{r^2 - 0^2} &= r	\\
 	\frac{dz}{d\theta} &=  0
 \end{align*}
-
-?What was the reason this was proof enough!
-
-No streamline that starts at $z > 0$ can cross $z = 0$ due to the ?
+As the algebraic definition of a circle, using the Pythagorean theorem, is $radius^2 = ankathete^2 + gegenthete^2$ 
+which is the exact same definition we are given for $r$, which would imply that the streamlines are a circle around $z$.
+\\
+No streamline that starts at $z > 0$ can cross $z = 0$. If $t=0$ all streamlines are parallel and will not cross the $xy0$-plane. And if $t \neq 0$ then any streamline will point away from the plane, even for negative time.
 
 \section{Problem 3}
 We are to find the formula for the streamline, $SL$, going through the point $P = (r, 0, w_{0})$, when the time $t > 0$. \\
-Using the result from problem 3, we see that the x and y 'elements' are independent of time and so the only change is that the $z$-dimension is no longer always 0. 
+Using the result from problem 3, we see that the $x$- and $y$-components are independent of time and so the only change is that the $z$-dimension is no longer always 0. 
 We can write the formula as:
-$$ SL(x, y, z) = -\sqrt{r^2 - x^2} + \sqrt{r^2 - y^2} + zt$$
-and for the point $P$ this becomes:
-$$ SL(r, 0, w_{0}) = -\sqrt{r^2 - r^2} + \sqrt{r^2 - 0^2} + w_{0}t$$
+$$ SL(x, y, z) = (-\sqrt{r^2 - x^2})\bar{i} + (\sqrt{r^2 - y^2})\bar{j} + (zt)\bar{k}$$
+and for the point $P$ at $t > 0$ this becomes:
+\begin{align*}
+SL(r, 0, w_{0}) &=(-\sqrt{r^2 - r^2})\bar{i} + (\sqrt{r^2 - 0^2})\bar{j} + (w_{0}t)\bar{k}	\\
+SL(r, 0, w_{0}) &=0\bar{i} + r\bar{j} + (w_{0}t)\bar{k}
+\end{align*}
 where r is the radius of the circle around on which z lies.
 \\
-The streamlines going through $(r, 0, 0)$ are the same as the ones found in problem 3, since when $z=0$ the $z$ 'element' becomes independent of time.
+The streamlines going through $(r, 0, 0)$ are the same as the ones found in problem 3, since when $z=0$ the z-component is on the origin.
 
 \section{Problem 4}
-We are to find the path line, $PL$ for the velocity field, $\bar{u}$, given in problem 1, that goes through the point $P = (r, 0, z_{0})$ at $t=0$.
+We are to find the path line, $PL$, for the velocity field, $\bar{u}$, given in problem 1, that goes through the point $P = (r, 0, z_{0})$ at $t=0$.
 \\
 The path lines are defined to be the trajectories of an individual particle in a fluid.
-Where the suffix $P$ is indicates a single particle and not the point $P$.
-\[ 
+\[ PL = 
 \begin{cases} 
-   \frac{d\bar{x}}{dt} &= \bar{u}_{P}(\bar{x}_{P}, t)	\\
-   \bar{x}_{P}(t_{0})  &= \bar{x}_{P0}  
+   \frac{d\bar{x}}{dt} &= \bar{u}(\bar{x}, t)	\\
+   \bar{x_{t_0}} &= \bar{\xi}(t_{0})
 \end{cases} 
 \]
-As $t=0 = t_{0}$, the path line is simply the position of the particle at $t=0$. To prove this we need to derive it from the velocity field at the specified point.
+From the velocity field we can derive the spatial coordinate formula, which is based on the initial position and time.
 \begin{align*}
 	\frac{dx}{dt} &= \bar{u_1} = -y 	\\	
 	dx &= -ydt						\\
@@ -156,29 +156,35 @@ $$PL(r, 0, z_0, 0) = (x_0)\hat{i} + (y_0)\hat{j} + (z_0)\hat{k}$$
 \section{Problem 5}
 We are to find the expression for the streak lines emerging from the point $(r_0, 0, z_0)$. \\
 
-Streak lines are the curve connecting all particles that pass through a given point, $p$, from time $t_0 \leq s \leq t$, and is defined as $x = x(\xi[p,s],t)$.
+Streak lines are the curve connecting all particles that pass through a given point, $P$, from time $t_0 \leq s \leq t$, and is defined as $x = x(\xi[P,s],t)$.
 
-We derive an expression for the spatial coordinates from the velocity field given in the same way as we did in problem 4.
+As we did in problem 4, we find the expression for the spatial coordinates from the given velocity field.
 \begin{align*}
-	\frac{dx}{dt} &= u	\\
 	x(x,y,z, t) &= (x_0-yt)\hat{i} + (y_0+xt)\hat{j} + (z_0e^{\frac{1}{2}t^2})\hat{k}
 \end{align*}
+
+
 We can replace the initial coordinates, $x_0$, $y_0$ and $z_0$, with the material coordinates $\xi_i$, since $\xi$ is equal to the initial spatial coordinates for each particle in the flow.
 $$x(x,y,z, t) = (\xi_1-yt)\hat{i} + (\xi_2+xt)\hat{j} + (\xi_3e^{\frac{1}{2}t^2})\hat{k}$$
 Reshuffling this gives us:
 \begin{equation} \label{eq:material}
-\xi_i = (x+yt)\hat{i} + (y-xt)\hat{j} + (ze^{-\frac{1}{2}t^2})\hat{k}
+\xi_i(x,y,z,t) = (x+yt)\hat{i} + (y-xt)\hat{j} + (ze^{-\frac{1}{2}t^2})\hat{k}
 \end{equation}
 
-The expression for the particle at position $p(x,y,z)$ and time $s$ is then:
+The expression for the material coordinate of the particle at position $P(x_P,y_P,z_P)$ and time $s$ is then:
 \begin{equation} \label{eq:positionP}
-\xi_i = (x+ys)\hat{i} + (y-xs)\hat{j} + (z^{-\frac{1}{2}s^2})\hat{k}
+\xi_i(x_P,y_P,z_P,s) = (x_P+y_Ps)\hat{i} + (y_P-x_Ps)\hat{j} + (z_P^{-\frac{1}{2}s^2})\hat{k}
 \end{equation}
-The streak line expression is then found by inserting ~\eqref{eq:material} into ~\eqref{eq:positionP} and using the coordinates for the emerging point, $(r_o, 0, z_0)$:
+The streak line expression is then found by inserting ~\eqref{eq:material} into ~\eqref{eq:positionP} and using the coordinates for the given point, $(r_o, 0, z_0)$:
 \begin{align*}
 	(x+yt)\hat{i} + (y-xt)\hat{j} + (ze^{-\frac{1}{2}t^2})\hat{k}
 		= 
-	(x+ys)\hat{i} + (y-xs)\hat{j} + (z^{-\frac{1}{2}s^2})\hat{k}
+	(x_P+y_Ps)\hat{i} + (y_P-x_Ps)\hat{j} + (z_P^{-\frac{1}{2}s^2})\hat{k}
+\end{align*}
+\begin{align*}
+	x+yt &= x_P+y_Ps 			& 	
+	y-xt &= y_P-x_Ps			&	
+	ze^{-\frac{1}{2}t^2} &= z_P^{-\frac{1}{2}s^2}
 \end{align*}
 \begin{align*}
 	x_1 &= r_0 	& 	
@@ -199,50 +205,48 @@ This gives us:
   			-y 			 & x 			& zt			 		
 		\end{vmatrix}
 		\\
-		&=  (\frac{dzt}{dy}-\frac{dx}{dz})\bar{i} + 
-			(\frac{dy}{dz}-\frac{dzt}{dx})\bar{j} + 
+		&=  (\frac{d(zt)}{dy}-\frac{dx}{dz})\bar{i} + 
+			(-\frac{dy}{dz}-\frac{dzt}{dx})\bar{j} + 
 			(\frac{dx}{dx}+\frac{dy}{dy})\bar{k}
 		\\
 		Vorticity &= 0\bar{i} + 0\bar{j} + 2\bar{k}
 \end{align*}
 
 \section{Problem 7}
+We are to calculate the strain rate tensor and rotations tensor for the velocity field given in Problem 1. \\
+The definition of the strain rate tensor, $e$, according to Kundu is:
+\[ 
+	e_{ij}
+   		= \frac{1}{2} \left( \frac{\partial u_i}{\partial x_j}
+      + \frac{\partial u_j}{\partial x_i}
+       \right)
+\]
 
-Since 
-
-\[ \frac{\partial u_{i}}{\partial t_{j}}
-   = \frac{1}{2} \left( \frac{\partial u_i}{\partial x_j}
-      + \frac{\partial u_j}{\partial y_i}
-       \right) +
-       \frac{1}{2} \left( \frac{\partial u_i}{\partial x_j}
-      - \frac{\partial u_j}{\partial y_i}
-       \right) = 
-       s_{ij} + \frac{1}{2}\omega_{ij}\]
-       
-and 
-
-\[\omega_{ij}= 
-\frac{1}{2} \left( \frac{\partial u_i}{\partial x_j}
-      - \frac{\partial u_j}{\partial y_i}
-       \right)\]
-       
-we can find the strain rate tensor by simply expanding the tensor formula and solving for it using our two vectors given by the velocity field
+while his definition of the rotation tensor, $\omega$, is:
+\[
+	\omega_{ij} = \bigtriangledown \times \bar{u}=
+		\frac{\partial u_i}{\partial x_j} -
+		\frac{\partial u_j}{\partial x_i}
+\]
+     
+We can find the strain rate tensor by simply expanding the tensor formula and solving for it using our two vectors given by the velocity field
 \[\vec{x}= <x, y, z>\] \[\vec{u}=<-y, x, zt>\]
 
-\[s_{ij}=
-\begin{bmatrix}
-       \frac{\partial -y}{\partial x} & 
-       \frac{1}{2}(\frac{\partial x}{\partial x} + \frac{\partial -y}{\partial y}) & 
-       \frac{1}{2}(\frac{\partial zt}{\partial x} + \frac{\partial -y}{\partial z}) \\[0.3em]
+\[
+	e_{ij}=
+	\begin{bmatrix}
+    	   -\frac{\partial y}{\partial x} & 
+	       \frac{1}{2}(\frac{\partial x}{\partial x} - \frac{\partial y}{\partial y}) & 
+	       \frac{1}{2}(\frac{\partial (zt)}{\partial x} - \frac{\partial y}{\partial z}) \\[0.3em]
        
-       \frac{1}{2}(\frac{\partial -y}{\partial y} + \frac{\partial x}{\partial x}) & 
-       \frac{\partial x}{\partial y} & 
-       \frac{1}{2}(\frac{\partial zt}{\partial y} + \frac{\partial x}{\partial z}) \\[0.3em]
+  	     \frac{1}{2}(-\frac{\partial y}{\partial y} + \frac{\partial x}{\partial x}) & 
+  	     \frac{\partial x}{\partial y} & 
+  	     \frac{1}{2}(\frac{\partial (zt)}{\partial y} + \frac{\partial x}{\partial z}) \\[0.3em]
        
-       \frac{1}{2}(\frac{\partial -y}{\partial z} + \frac{\partial zt}{\partial x}) & 
-       \frac{1}{2}(\frac{\partial x}{\partial z} + \frac{\partial zt}{\partial y}) & 
-       \frac{\partial zt}{\partial z} \\[0.3em]
-     \end{bmatrix}
+  	     \frac{1}{2}(-\frac{\partial y}{\partial z} + \frac{\partial (zt)}{\partial x}) & 
+  	     \frac{1}{2}(\frac{\partial x}{\partial z} + \frac{\partial (zt)}{\partial y}) & 
+  	     \frac{\partial (zt)}{\partial z} \\[0.3em]
+     \end{bmatrix}     
      =\begin{bmatrix}
        0 & 
        0 & 
@@ -261,24 +265,24 @@ The rotation tensor can similarly be found using the same method.
      
      \[\omega_{ij}=
 \begin{bmatrix}
-       \frac{\partial -y}{\partial x} - \frac{\partial -y}{\partial x} & 
-       \frac{1}{2}(\frac{\partial x}{\partial x} - \frac{\partial -y}{\partial y}) & 
-       \frac{1}{2}(\frac{\partial zt}{\partial x} - \frac{\partial -y}{\partial z}) \\[0.3em]
+       - \frac{\partial y}{\partial x} + \frac{\partial y}{\partial x} 	& 
+       - \frac{\partial y}{\partial y} - \frac{\partial x}{\partial x}	& 
+       - \frac{\partial y}{\partial z} - \frac{\partial zt}{\partial x}	\\[0.3em]
        
-       \frac{1}{2}(\frac{\partial -y}{\partial y} - \frac{\partial x}{\partial x}) & 
+       \frac{\partial x}{\partial x} + \frac{\partial y}{\partial y} & 
        \frac{\partial x}{\partial y} - \frac{\partial x}{\partial y} & 
-       \frac{1}{2}(\frac{\partial zt}{\partial y} - \frac{\partial x}{\partial z}) \\[0.3em]
+       \frac{\partial x}{\partial z} - \frac{\partial zt}{\partial y} \\[0.3em]
       
-       \frac{1}{2}(\frac{\partial -y}{\partial z} - \frac{\partial zt}{\partial x}) & 
-       \frac{1}{2}(\frac{\partial x}{\partial z} - \frac{\partial zt}{\partial y}) & 
+       \frac{\partial zt}{\partial x} + \frac{\partial y}{\partial z} & 
+       \frac{\partial zt}{\partial y} - \frac{\partial x}{\partial z} & 
        \frac{\partial zt}{\partial z} - \frac{\partial zt}{\partial z} \\[0.3em]
      \end{bmatrix}
      =\begin{bmatrix}
        0 & 
-       2 & 
+       -2 & 
        0\\[0.3em]
        
-       -2 & 
+       2 & 
        0 & 
        0\\[0.3em]
        
@@ -288,6 +292,18 @@ The rotation tensor can similarly be found using the same method.
      \end{bmatrix}\]
 
 \section{Problem 8}
-We are to calculate the relative dilatation following a particle path.
+We are to calculate the relative dilatation following a particle path. \\
+The definition of dilatation is $\bigtriangledown \bullet \bar{u}$.	\\
+The calculation becomes:
+\begin{align*}
+	\bigtriangledown \bullet \bar{u} &= 	
+		\frac{\partial u_1}{\partial x} + \frac{\partial u_2}{\partial y} + \frac{\partial u_3}{\partial z}
+	\\
+	&= -\frac{\partial y}{\partial x} + \frac{\partial x}{\partial y} + \frac{\partial (zt)}{\partial z}
+	\\
+	&= 0 + 0 + t
+\end{align*}
+
+Using the relative dilatation path given by Kundu which is 
 
 \end{document}
