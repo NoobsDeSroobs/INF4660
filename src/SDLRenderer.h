@@ -42,6 +42,10 @@ void clear(){
 	SDL_FillRect( screenSurface, NULL, SDL_MapRGB( screenSurface->format, 0xFF, 0xFF, 0xFF ) );
 }
 
+SDL_Surface* getMainSurface(){
+	return screenSurface;
+}
+
 Uint32 RGBA2INT(unsigned int iR, unsigned int iG, unsigned int iB, unsigned int iA)
 {
   return ((iA * 256 + iR) * 256 + iG) * 256 + iB;
