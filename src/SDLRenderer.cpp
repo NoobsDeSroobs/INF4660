@@ -29,7 +29,7 @@ void SDLRenderer::setupSDLWindow(){
 		} else {
 			//Get window surface
 			screenSurface = SDL_GetWindowSurface( window );
-
+			SDL_SetColorKey(screenSurface, SDL_TRUE, SDL_MapRGB(screenSurface->format, 0, 255, 0));
 			//Fill the surface white
 			SDL_FillRect( screenSurface, NULL, SDL_MapRGB( screenSurface->format, 0xFF, 0xFF, 0xFF ) );
 
@@ -39,11 +39,12 @@ void SDLRenderer::setupSDLWindow(){
 				}
 			}
 
+			Main_Renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_SOFTWARE);
 			//Update the surface
 			SDL_UpdateWindowSurface( window );
 
 			//Wait two seconds
-			SDL_Delay( 2000 );
+			SDL_Delay( 200 );
 		}
 	}
 
@@ -59,3 +60,53 @@ void SDLRenderer::killSDL(){
 
 }
 
+void SDLRenderer::renderImgAtPos(int x, int y, int imgX, int imgY, int width, int height, double angle){
+	SDL_Rect SrcR;
+	SDL_Rect DestR;
+	SDL_Point originOfRot;
+	originOfRot.x = x;
+	originOfRot.y = y;
+	SrcR.x = imgX;
+	SrcR.y = imgY;
+	SrcR.w = width;
+	SrcR.h = height;
+	DestR.x = y;
+	DestR.y = y;
+	DestR.w = width;
+	DestR.h = height;
+	int ret = SDL_RenderCopyEx(Main_Renderer,
+	                   Tex,
+	                   NULL,
+					   &DestR,
+					   angle,
+					   &originOfRot,
+					   SDL_FLIP_NONE);
+	cout << "Rendering bmp / " << ret << endl;
+
+}
+
+
+void SDLRenderer::SetTexture(std::string path){
+	//The final texture
+
+	    //Load image at specified path
+	    SDL_Surface* picture = SDL_LoadBMP( path.c_str() );
+	    if( picture == NULL )
+	    {
+	        printf( "Unable to load image %s! \n", path.c_str() );
+	    }
+	    else
+	    {
+	    	SDL_SetColorKey(picture, SDL_TRUE, SDL_MapRGB(screenSurface->format, 0, 255, 0));
+	        //Create texture from surface pixels
+	        Tex = SDL_CreateTextureFromSurface( Main_Renderer, picture );
+	        if( Tex == NULL )
+	        {
+	            printf( "Unable to create texture from %s! SDL Error: %s\n", path.c_str(), SDL_GetError() );
+	        }
+
+	        //Get rid of old loaded surface
+	        SDL_FreeSurface( picture );
+	    }
+
+}
