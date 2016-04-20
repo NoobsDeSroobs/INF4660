@@ -1,0 +1,99 @@
+\documentclass[11pt,a4paper,english]{article}
+\usepackage[english]{babel} % Using babel for norwegian hyphenation
+\usepackage{lmodern} % Changing the font
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+
+\usepackage{tcolorbox}
+\usepackage[parfill]{parskip} % Removes indents
+\usepackage{amsmath} % Environment, symbols etc...
+\usepackage{amssymb}
+\usepackage{float} % Fixing figure locations
+\usepackage{multirow} % For nice tables
+\usepackage{graphicx} % For pictures etc...
+\usepackage{enumitem} % Points/lists
+\usepackage{url}
+\usepackage{hyperref}
+
+\definecolor{red}{RGB}{255,10,10}
+
+% To include code(-snippets) with æøå
+\usepackage{listings}
+\lstset{
+language=c++,
+showspaces=false,
+showstringspaces=false,
+frame=l,
+}
+
+\tolerance = 5000 % Bedre tekst
+\hbadness = \tolerance
+\pretolerance = 2000
+
+\numberwithin{equation}{section}
+
+\newcommand{\conj}[1]{#1^*}
+\newcommand{\ve}[1]{\mathbf{#1}} % Vektorer i bold
+\let\oldhat\hat
+\renewcommand{\hat}[1]{\mathbf{\oldhat{#1}}}
+\newcommand{\trans}[1]{#1^\top}
+\newcommand{\herm}[1]{#1^\dagger}
+\newcommand{\Real}{\mathbb{R}}
+\newcommand{\bigO}[1]{\mathcal{O}\left( #1 \right)}
+
+\newcommand{\spac}{\hspace{5mm}}
+
+\title{UNIK4660 - Assignment 2}
+\author{Wilhelm Karlsen and Magnus Eden}
+\date{\today}
+
+\begin{document}
+\maketitle
+In this assignment we are first to visualize two sets of vector fields by their field lines. Secondly, to create a Line Integral Convolution(LIC) implementation and show its functionality on these fields. The vector field are given in the form of two .hdf5 files and are two different hurricane simulations, Isabel and Metsim. 
+\\
+We are also to implement and compare different integration methods, specifically Forward Euler and Fourth Order Runge-Kutta, and use differently sized convolution kernels. The results are shown and discussed at the end of this report.
+
+\section{Field Line Visualization}
+
+\section{Line Integral Convolution}
+LIC is a visualization technique used to show the motion and flow in fluids. Using a simple gray-scale noise image it generates a texture by taking every pixel in the image and running it through a convolution kernel. The intended effect is lines that follow the vector field, and gives good, intuitive understanding of the flow direction. The lines are kept distinct by the varying gray scales, though they can be given different colors to help show additional system information, such as the vector magnitude.
+
+Given a field line $\sigma$, the operation can be described by
+\begin{align*}
+	I(x_0) = \int_{S_0+L}^{S_0-L}k(s - s_0)T(\sigma(s))ds
+\end{align*}
+Where $I(x_0)$ is the intensity of a pixel at $x_0 = \sigma(s_0)$. $k$ is the convolution kernel with length $2L$, and $s$ is the arc-length.
+
+\section{Implementation}
+
+\subsection{Forward Euler}
+
+\begin{align*}
+	\psi_{n+1} =& (x_{n+1}, y_{n+1}) = (x_n, y_n) + hf(x_n, y_n)
+\end{align*}
+f() is the vector field
+
+\subsection{Fourth Order Runge-Kutta}
+\begin{align*}
+	\dot{\psi} =& f(t,\psi), & \psi(t_0) = \psi_0, & t = (x_n, y_n)
+\end{align*}
+\begin{align*}
+	k_1 =& f(t_n, \psi_n)	\\
+	k_2 =& f(t_n + \frac{h}{2}, \psi_n + \frac{h}{2}k_1)	\\
+	k_3 =& f(t_n + \frac{h}{2}, \psi_n + \frac{h}{2}k_2)	\\
+	k_4 =& f(t_n + h, \psi_n + hk_3)	\\	
+	\psi_{n+1} =& \psi_n + \frac{h}{6}(k_1 + 2k_2 + 2k_3 + k_4)
+\end{align*}
+
+\section{Results}
+\subsection{Forward Euler: FilterVariations}
+
+%\includegraphics[scale=1.0]{PathFileName}
+
+\subsection{4th order Runge-Kutta: FilterVariations}
+
+%\includegraphics[scale=1.0]{PathFileName}
+
+\section{Conclusion and Comparison}
+
+\end{document}
