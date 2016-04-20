@@ -11,8 +11,9 @@ void SDLRenderer::PutPixel32_nolock(SDL_Surface * surface, int x, int y, Uint32 
 {
 	if(x > 0 && x < SCREEN_WIDTH && y > 0 && y < SCREEN_HEIGHT){
 		Uint8 * pixel = (Uint8*)surface->pixels;
-		pixel += (y * surface->pitch) + (x * sizeof(Uint32));
-		*((Uint32*)pixel) = color;
+		int bufferPos = y * SCREEN_WIDTH + x;
+		pixel += bufferPos * sizeof(Uint32);
+		*(Uint32*)pixel = color;
 	}
 }
 
@@ -62,7 +63,7 @@ void SDLRenderer::killSDL(){
 
 }
 
-void SDLRenderer::renderImgAtPos(int x, int y, int imgX, int imgY, int width, int height, double angle){
+int SDLRenderer::renderImgAtPos(int x, int y, int imgX, int imgY, int width, int height, double angle){
 	SDL_Rect SrcR;
 	SDL_Rect DestR;
 	SDL_Point originOfRot;
@@ -84,7 +85,7 @@ void SDLRenderer::renderImgAtPos(int x, int y, int imgX, int imgY, int width, in
 					   &originOfRot,
 					   SDL_FLIP_NONE);
 	cout << "Rendering bmp / " << ret << endl;
-
+	return ret;
 }
 
 

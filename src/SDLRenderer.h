@@ -13,8 +13,10 @@
 using namespace std;
 
 class SDLRenderer{
+public:
 int SCREEN_WIDTH;
 int SCREEN_HEIGHT;
+private:
 Uint32 GREENSCREEN;
 //The window we'll be rendering to
 SDL_Window* window = NULL;
@@ -34,7 +36,7 @@ SDLRenderer(int wWidth, int wHeight){
 void PutPixel32_nolock(SDL_Surface * surface, int x, int y, Uint32 color);
 void setupSDLWindow();
 void killSDL();
-void renderImgAtPos(int x, int y, int imgX, int imgY, int width, int height, double angle);
+int renderImgAtPos(int x, int y, int imgX, int imgY, int width, int height, double angle);
 void SetTexture(std::string path);
 void renderToScreen(){SDL_UpdateWindowSurface( window );}
 void clear(){
