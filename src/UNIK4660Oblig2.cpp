@@ -15,21 +15,18 @@ using namespace std;
 
 
 void Test(SDLRenderer &renderer){
-	unsigned int test = renderer.RGBA2INT(15, 15, 15, 15);
-	unsigned int check = 252645135;
-
-	cout << "Test:" << test << ", check:" << check << endl;
-
+	renderer.SetTexture("/home/noobsdesroobs/Downloads/arrow.bmp");
+	renderer.renderImgAtPos(50, 50, 0, 0, 300, 10, 45);
+	renderer.renderImgAtPos(300, 50, 0, 0, 300, 10, 100);
+	renderer.renderToScreen();
 }
-
+void drawAllPoints();
 
 //This system is LITTLE ENDIAN!!!!
 int main() {
-
-
 	SDLRenderer renderer(680, 480);
-	Test(renderer);
 	renderer.setupSDLWindow();
+	Test(renderer);
 	H5::H5File file ("/home/noobsdesroobs/Downloads/metsim1_2d.h5", H5F_ACC_RDONLY);
 
 	H5::Group velocity = file.openGroup("Velocity");
@@ -58,54 +55,49 @@ int main() {
 	cout << "Size of type: " << type.getSize() << endl <<
 			"Num dims: " << space.getSimpleExtentNdims() << endl <<
 			"Size of dims: " << space.getSelectNpoints() << endl;
-int counter = 0;
-	//for(uint i = 0; i < dims[0]; i++){
-		//for(uint j = 0; j < dims[1]; j++){
-			float f = data_out[0][0];
-			if(f != 0)
-				counter++;
-			//if(f == 0.012566418)
-			cout << "Value: " << f << endl;
-		//}
-	//}
 
-
-	cout << counter;
 	file.close();
-	cin >> dims[0];
+
+
+	bool RUNNING = true;
+	/* An SDL_Event */
+    SDL_Event event;
+	while(RUNNING)
+	{
+	    while(SDL_PollEvent(&event))
+	    {
+
+	    	if(event.type == SDL_QUIT){
+	    		RUNNING = false;
+	    	}
+
+	    	/* If a quit event has been sent */
+	    	switch( event.key.keysym.sym ){
+			  case SDLK_DOWN:
+				printf( "Move time forward.\n" );
+				break;
+
+			  case SDLK_UP:
+				printf( "Move time backwards.\n" );
+				break;
+
+			  case SDLK_ESCAPE:
+				/* Quit the application */
+				RUNNING = false;
+				break;
+
+			  default:
+				  drawAllPoints();
+				break;
+	    	 }
+
+	    }
+	}
+
 	renderer.killSDL();
 	return 0;
 }
 
-float forwardEulerIntegration(void){
-
-	return 0;
+void drawAllPoints(){
+	//For each point. point.render()
 }
-
-float fourthOrdRungeKuttaIntegration(void){
-
-	return 0;
-}
-
-double f(double x, double y[], int i) {
-	return (x - y[0]); /* derivative of first equation */
-}
-
-
-void euler(double x, double y[], double step)
-{
-	int N = 1;
-	double s[N]; /* for euler */
-	int i;
-	{
-		for (i = 0; i < N; i++) {
-			s[i] = step * f(x, y, i);
-		}
-	}
-
-	{
-		for (i = 0; i < N; i++)
-			y[i] += s[i];
-	}
-}
-
