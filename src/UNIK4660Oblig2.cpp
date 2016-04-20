@@ -10,75 +10,26 @@
 #include <iostream>
 #include <H5Cpp.h>
 #include <string.h>
-#include <SDL.h>
+#include "SDLRenderer.h"
 using namespace std;
 
-const int SCREEN_WIDTH = 640;
-const int SCREEN_HEIGHT = 480;
-//The window we'll be rendering to
-SDL_Window* window = NULL;
 
-//The surface contained by the window
-SDL_Surface* screenSurface = NULL;
+void Test(SDLRenderer &renderer){
+	unsigned int test = renderer.RGBA2INT(15, 15, 15, 15);
+	unsigned int check = 252645135;
 
-void PutPixel32_nolock(SDL_Surface * surface, int x, int y, Uint32 color)
-{
-    Uint8 * pixel = (Uint8*)surface->pixels;
-    pixel += (y * surface->pitch) + (x * sizeof(Uint32));
-    *((Uint32*)pixel) = color;
-}
-
-void setupSDLWindow(){
-
-	//Initialize SDL
-	if( SDL_Init( SDL_INIT_VIDEO ) < 0 )
-	{
-		printf( "SDL could not initialize! SDL_Error: %s\n", SDL_GetError() );
-	}else{
-		//Create window
-		window = SDL_CreateWindow( "SDL Tutorial", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN );
-		if( window == NULL )
-		{
-			printf( "Window could not be created! SDL_Error: %s\n", SDL_GetError() );
-		} else {
-			//Get window surface
-			screenSurface = SDL_GetWindowSurface( window );
-
-			//Fill the surface white
-			SDL_FillRect( screenSurface, NULL, SDL_MapRGB( screenSurface->format, 0xFF, 0xFF, 0xFF ) );
-
-			for(int i = 0; i < 10; i++){
-				for (int j = 0; j < 10; ++j) {
-					PutPixel32_nolock(screenSurface, 10+i, 10+j, (Uint32)123);
-				}
-			}
-
-			//Update the surface
-			SDL_UpdateWindowSurface( window );
-
-			//Wait two seconds
-			SDL_Delay( 2000 );
-		}
-	}
+	cout << "Test:" << test << ", check:" << check << endl;
 
 }
-
-void killSDL(){
-
-    //Destroy window
-    SDL_DestroyWindow( window );
-
-    //Quit SDL subsystems
-    SDL_Quit();
-
-}
-
 
 
 //This system is LITTLE ENDIAN!!!!
 int main() {
 
-	setupSDLWindow();
+
+	SDLRenderer renderer(680, 480);
+	Test(renderer);
+	renderer.setupSDLWindow();
 	H5::H5File file ("/home/noobsdesroobs/Downloads/metsim1_2d.h5", H5F_ACC_RDONLY);
 
 	H5::Group velocity = file.openGroup("Velocity");
@@ -122,7 +73,7 @@ int counter = 0;
 	cout << counter;
 	file.close();
 	cin >> dims[0];
-	killSDL();
+	renderer.killSDL();
 	return 0;
 }
 
