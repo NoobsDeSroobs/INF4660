@@ -9,9 +9,11 @@
 
 void SDLRenderer::PutPixel32_nolock(SDL_Surface * surface, int x, int y, Uint32 color)
 {
-    Uint8 * pixel = (Uint8*)surface->pixels;
-    pixel += (y * surface->pitch) + (x * sizeof(Uint32));
-    *((Uint32*)pixel) = color;
+	if(x > 0 && x < SCREEN_WIDTH && y > 0 && y < SCREEN_HEIGHT){
+		Uint8 * pixel = (Uint8*)surface->pixels;
+		pixel += (y * surface->pitch) + (x * sizeof(Uint32));
+		*((Uint32*)pixel) = color;
+	}
 }
 
 void SDLRenderer::setupSDLWindow(){
