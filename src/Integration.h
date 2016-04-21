@@ -1,12 +1,45 @@
+#ifndef INTEGRATION
+#define INTEGRATION
 
+#include <math.h>
+
+struct point{
+	float x;
+	float y;
+	
+	point(){
+		x = 0.0;
+		y = 0.0;
+	}
+	
+	point(int x, int y): x(x), y(y){
+	}
+};
+
+struct vecData{
+	float x;
+	float y;
+	bool trueData;
+	
+	vecData(){
+		x = 0;
+		y = 0;
+		trueData = false;
+	}
+	vecData(float x, float y): x(x), y(y), trueData(false){
+	
+	}
+	
+	float length(){
+		return sqrt(pow(x, 2)+pow(y, 2));
+	}
+};
 
 class Integrations{
 	public:
-		Integrations();
-		virtual ~Integrations();
+		static point ForwardEuler(point u_n, vecData vComp, float stepSize);
 		
-		float ForwardEuler(float u_n, float vComp, float stepSize);
-		
-		float RungeKutta(float u_n, float stepSize,
-						 float vComp, float vCompDelta);
+		static point RungeKutta(point u_n, vecData vComp, float stepSize);
 };
+
+#endif
