@@ -17,7 +17,7 @@ void SDLRenderer::PutPixel32_nolock(SDL_Surface * surface, int x, int y, Uint32 
 	}
 }
 
-void SDLRenderer::setupSDLWindow(string windName){
+void SDLRenderer::setupSDLWindow(string windName, bool greyScale){
 
 	//Initialize SDL
 	if( SDL_Init( SDL_INIT_VIDEO ) < 0 )
@@ -32,7 +32,17 @@ void SDLRenderer::setupSDLWindow(string windName){
 		} else {
 			//Get window surface
 			screenSurface = SDL_GetWindowSurface( window );
-			SDL_SetColorKey(screenSurface, SDL_TRUE, SDL_MapRGB(screenSurface->format, 0, 255, 0));
+			if(greyScale){
+				SDL_Color colors[256];
+				int i;
+
+				for(i = 0; i < 256; i++)
+				{
+				    colors[i].r = colors[i].g = colors[i].b = i;
+				}
+			}else{
+				SDL_SetColorKey(screenSurface, SDL_TRUE, SDL_MapRGB(screenSurface->format, 0, 255, 0));
+			}
 			//Fill the surface white
 			SDL_FillRect( screenSurface, NULL, SDL_MapRGB( screenSurface->format, 0xFF, 0xFF, 0xFF ) );
 

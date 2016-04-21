@@ -36,7 +36,7 @@ SDLRenderer(int wWidth, int wHeight){
 }
 
 void PutPixel32_nolock(SDL_Surface * surface, int x, int y, Uint32 color);
-void setupSDLWindow(string windName = "Main window");
+void setupSDLWindow(string windName = "Main window", bool greyScale = false);
 void killSDL();
 int renderImgAtPos(int x, int y, int imgX, int imgY, int width, int height, double angle);
 void drawLine(std::vector<point> &curve);

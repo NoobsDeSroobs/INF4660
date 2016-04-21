@@ -35,7 +35,7 @@ int main() {
 	SDLRenderer renderer(500, 500);
 	renderer.setupSDLWindow();
 	SDLRenderer noiseImageRenderer(renderer.SCREEN_WIDTH, renderer.SCREEN_HEIGHT);
-	noiseImageRenderer.setupSDLWindow("Noise Image");
+	noiseImageRenderer.setupSDLWindow("Noise Image", true);
 	renderer.SetTexture("/home/noobsdesroobs/Downloads/arrow.bmp");
 	//Test(renderer);
 
