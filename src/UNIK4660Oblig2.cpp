@@ -148,6 +148,7 @@ void drawStreamLines(ReadData &data, SDLRenderer& renderer){
 	float stepSize = 0.25f;
 	float d = 1;
 	int stride = 10;
+	int length = 6;
 	std::queue<point> seedCandidates;
 	std::vector<Streamline> finishedSLs;
 	std::queue<Streamline> SLQueue;
@@ -166,7 +167,7 @@ void drawStreamLines(ReadData &data, SDLRenderer& renderer){
 	bool finished = false;
 	bool validCandidate = false;
 
-	Streamline currentStreamLine(candidateSeed.x, candidateSeed.y, 5, false, stepSize, 0);
+	Streamline currentStreamLine(candidateSeed.x, candidateSeed.y, length, false, stepSize, 0, data);
 	finishedSLs.push_back(currentStreamLine);
 	while(!finished){
 		while(!validCandidate){
@@ -184,7 +185,7 @@ void drawStreamLines(ReadData &data, SDLRenderer& renderer){
 
 		if(validCandidate){
 			//Compute streamline and add to streamline queue.
-			SLQueue.push(Streamline(candidateSeed.x, candidateSeed.y, false, stepSize, 0));
+			SLQueue.push(Streamline(candidateSeed.x, candidateSeed.y, length, false, stepSize, 0, data));
 			validCandidate = false;
 		}else{
 			if(SLQueue.size() == 0){

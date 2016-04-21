@@ -1,3 +1,4 @@
+#pragma once
 #include <string>
 #include <H5Cpp.h>
 #include <math.h>
