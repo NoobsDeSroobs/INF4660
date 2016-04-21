@@ -67,13 +67,11 @@ int SDLRenderer::renderImgAtPos(int x, int y, int imgX, int imgY, int width, int
 	SDL_Rect SrcR;
 	SDL_Rect DestR;
 	SDL_Point originOfRot;
-	originOfRot.x = x;
-	originOfRot.y = y;
 	SrcR.x = imgX;
 	SrcR.y = imgY;
 	SrcR.w = width;
 	SrcR.h = height;
-	DestR.x = y;
+	DestR.x = x;
 	DestR.y = y;
 	DestR.w = width;
 	DestR.h = height;
@@ -82,9 +80,8 @@ int SDLRenderer::renderImgAtPos(int x, int y, int imgX, int imgY, int width, int
 	                   NULL,
 					   &DestR,
 					   angle,
-					   &originOfRot,
+					   NULL,
 					   SDL_FLIP_NONE);
-	cout << "Rendering bmp / " << ret << endl;
 	return ret;
 }
 
@@ -96,7 +93,7 @@ void SDLRenderer::SetTexture(std::string path){
 	    SDL_Surface* picture = SDL_LoadBMP( path.c_str() );
 	    if( picture == NULL )
 	    {
-	        printf( "Unable to load image %s! \n", path.c_str() );
+	        fprintf( stderr, "Unable to load image %s! \n", path.c_str() );
 	    }
 	    else
 	    {
@@ -105,7 +102,7 @@ void SDLRenderer::SetTexture(std::string path){
 	        Tex = SDL_CreateTextureFromSurface( Main_Renderer, picture );
 	        if( Tex == NULL )
 	        {
-	            printf( "Unable to create texture from %s! SDL Error: %s\n", path.c_str(), SDL_GetError() );
+	            fprintf( stderr, "Unable to create texture from %s! SDL Error: %s\n", path.c_str(), SDL_GetError() );
 	        }
 
 	        //Get rid of old loaded surface

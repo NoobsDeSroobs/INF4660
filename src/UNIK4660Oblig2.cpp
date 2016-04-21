@@ -13,6 +13,8 @@
 #include <string.h>
 #include "SDLRenderer.h"
 #include "ReadData.h"
+#include <cmath>
+
 using namespace std;
 
 
@@ -26,7 +28,7 @@ void drawAllPoints(ReadData &data, SDLRenderer& renderer);
 
 //This system is LITTLE ENDIAN!!!!
 int main() {
-	SDLRenderer renderer(1000, 1000);
+	SDLRenderer renderer(500, 500);
 	renderer.setupSDLWindow();
 	renderer.SetTexture("/home/noobsdesroobs/Downloads/arrow.bmp");
 	//Test(renderer);
@@ -35,9 +37,9 @@ int main() {
 	string metsimPath = "/home/noobsdesroobs/Downloads/metsim1_2d.h5";
 
 	ReadData isabellData;
-	isabellData.readFromFile(isabellPath);
+	isabellData.readFromFile(isabellPath, true);
 	ReadData metsimData;
-	metsimData.readFromFile(metsimPath);
+	metsimData.readFromFile(metsimPath, false);
 
 	bool RUNNING = true;
 	/* An SDL_Event */
@@ -69,7 +71,7 @@ int main() {
 				RUNNING = false;
 				break;
 			  case SDLK_r:
-				  drawAllPoints(metsimData, renderer);
+				  drawAllPoints(isabellData, renderer);
 				  break;
 
 			  default:
@@ -79,7 +81,7 @@ int main() {
 
 	    }
 	}
-
+	fprintf(stderr, "Finished with the program.");
 	renderer.killSDL();
 	return 0;
 }
@@ -87,34 +89,35 @@ int main() {
 void drawAllPoints(ReadData &data, SDLRenderer& renderer){
 	float xPixelStep = renderer.SCREEN_WIDTH/(float)data.getWidth();
 	float yPixelStep = renderer.SCREEN_HEIGHT/(float)data.getHeight();
-	vector baseVec(1, 0);
+	velVector baseVec(1.0f, 0.0f);
 	renderer.clear();
 	int ctr = 1;
 	float rad2deg = 180/M_PI;
 	//For each point. point.render()
-	for(unsigned int i = 0; i < renderer.SCREEN_HEIGHT; i = i + 10){
-		for(unsigned int k = 0; k < renderer.SCREEN_WIDTH; k = k + 10){
-//			ctr++;
-//			vector currentVec = data.getVector(k, i);
-//			float vecLen = currentVec.length();
-//			if(vecLen == 0.0f){
-//				continue;
-//			}
-//			vector normedVec(currentVec.x/vecLen, normedVec.y/vecLen);
-//			double angle = acos(normedVec.x);
-//			angle = angle*rad2deg;
-//			float pixelCord = k*xPixelStep;
-//			float piyelCord = i*yPixelStep;
-			cout << xPixelStep << " , " << yPixelStep << " , " << ctr << endl;
-			renderer.PutPixel32_nolock(renderer.getMainSurface(), i+1, k+1, renderer.RGBA2INT(255, 0, 0, 255));
-			renderer.PutPixel32_nolock(renderer.getMainSurface(), i, k+1, renderer.RGBA2INT(255, 0, 0, 255));
-			renderer.PutPixel32_nolock(renderer.getMainSurface(), i+1, k, renderer.RGBA2INT(255, 0, 0, 255));
-			renderer.PutPixel32_nolock(renderer.getMainSurface(), i, k, renderer.RGBA2INT(255, 0, 0, 255));
-//			int ret = renderer.renderImgAtPos((int)pixelCord, (int)piyelCord, 0, 0, 20, 20, 0);
-//			if (ret == -1){
-//				return;
-//			}
+	for(unsigned int i = 0; i < data.getHeight(); i = i + 10){
+		for(unsigned int k = 0; k < data.getWidth(); k = k + 10){
+			ctr++;
+			velVector currentVec = data.getVector(k, i);
+			float vecLen = currentVec.length();
+			if(vecLen == 0.0f){
+				continue;
+			}
+			velVector normedVec(currentVec.x/vecLen, normedVec.y/vecLen);
+			double angle = acos(normedVec.x);
+			angle = angle*rad2deg;
+			float pixelCord = k*xPixelStep;
+			float piyelCord = i*yPixelStep;
+//			renderer.PutPixel32_nolock(renderer.getMainSurface(), i+1, k+1, renderer.RGBA2INT(255, 0, 0, 255));
+//			renderer.PutPixel32_nolock(renderer.getMainSurface(), i, k+1, renderer.RGBA2INT(255, 0, 0, 255));
+//			renderer.PutPixel32_nolock(renderer.getMainSurface(), i+1, k, renderer.RGBA2INT(255, 0, 0, 255));
+//			renderer.PutPixel32_nolock(renderer.getMainSurface(), i, k, renderer.RGBA2INT(255, 0, 0, 255));
+			int ret = renderer.renderImgAtPos((int)pixelCord, (int)piyelCord, 0, 0, 10, 5, angle);
+			if (ret == -1){
+				fprintf(stderr, "Failed to draw picture: %d.\n", ctr);
+				return;
+			}
 		}
 	}
 	renderer.renderToScreen();
+	SDL_SaveBMP(renderer.getMainSurface(), "Isabel.bmp");
 }

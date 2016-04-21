@@ -1,6 +1,7 @@
 #include <string>
 #include <H5Cpp.h>
 #include <math.h>
+#include <vector>
 using std::string;
 
 struct vector{
@@ -15,7 +16,7 @@ struct vector{
 	float length(){
 		return sqrt(pow(x, 2)+pow(y, 2));
 	}
-};
+} typedef velVector;
 
 class ReadData{
 	unsigned int width;
@@ -24,16 +25,16 @@ class ReadData{
 		ReadData();
 		virtual ~ReadData();
 		
-		void readFromFile(string fileName, string groupName = "Velocity",
+		void readFromFile(string fileName,  bool transpose = false, string groupName = "Velocity",
 				string compXName = "X-comp", string compYName = "Y-comp");
 		
-		vector getVector(int x, int y);
+		velVector getVector(int x, int y);
 		
 		unsigned int getWidth(){return width;}
 		unsigned int getHeight(){return height;}
 
 	private:
-		double** dataXComp;
-		double** dataYComp;
+		std::vector<std::vector<float>> dataXComp;
+		std::vector<std::vector<float>> dataYComp;
 		
 };
