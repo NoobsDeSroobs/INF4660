@@ -17,7 +17,7 @@ void SDLRenderer::PutPixel32_nolock(SDL_Surface * surface, int x, int y, Uint32 
 	}
 }
 
-void SDLRenderer::setupSDLWindow(){
+void SDLRenderer::setupSDLWindow(string windName){
 
 	//Initialize SDL
 	if( SDL_Init( SDL_INIT_VIDEO ) < 0 )
@@ -25,7 +25,7 @@ void SDLRenderer::setupSDLWindow(){
 		printf( "SDL could not initialize! SDL_Error: %s\n", SDL_GetError() );
 	}else{
 		//Create window
-		window = SDL_CreateWindow( "SDL Tutorial", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN );
+		window = SDL_CreateWindow( windName.c_str(), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN );
 		if( window == NULL )
 		{
 			printf( "Window could not be created! SDL_Error: %s\n", SDL_GetError() );
@@ -36,11 +36,6 @@ void SDLRenderer::setupSDLWindow(){
 			//Fill the surface white
 			SDL_FillRect( screenSurface, NULL, SDL_MapRGB( screenSurface->format, 0xFF, 0xFF, 0xFF ) );
 
-			for(int i = 0; i < 10; i++){
-				for (int j = 0; j < 10; ++j) {
-					PutPixel32_nolock(screenSurface, 10+i, 10+j, (Uint32)123);
-				}
-			}
 
 			Main_Renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_SOFTWARE);
 			//Update the surface
@@ -109,4 +104,15 @@ void SDLRenderer::SetTexture(std::string path){
 	        SDL_FreeSurface( picture );
 	    }
 
+}
+
+void SDLRenderer::drawLine(std::vector<point> &curve){
+	SDL_Point points[curve.size()];
+
+	for (int i = 0; i < curve.size(); ++i) {
+		points[i].x = curve[i].x;
+		points[i].y = curve[i].y;
+	}
+
+	SDL_RenderDrawLines(Main_Renderer, points, curve.size());
 }

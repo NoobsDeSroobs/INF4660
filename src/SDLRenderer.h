@@ -10,6 +10,8 @@
 #include <SDL.h>
 #include <string>
 #include <iostream>
+#include <vector>
+#include "Integration.h"
 using namespace std;
 
 class SDLRenderer{
@@ -34,9 +36,10 @@ SDLRenderer(int wWidth, int wHeight){
 }
 
 void PutPixel32_nolock(SDL_Surface * surface, int x, int y, Uint32 color);
-void setupSDLWindow();
+void setupSDLWindow(string windName = "Main window");
 void killSDL();
 int renderImgAtPos(int x, int y, int imgX, int imgY, int width, int height, double angle);
+void drawLine(std::vector<point> &curve);
 void SetTexture(std::string path);
 void renderToScreen(){SDL_UpdateWindowSurface( window );}
 void clear(){

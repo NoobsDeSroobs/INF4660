@@ -1,7 +1,8 @@
-#ifndef INTEGRATION
-#define INTEGRATION
+#ifndef INTEGRATIONS
+#define INTEGRATIONS
 
 #include <math.h>
+#include <cmath>
 
 struct point{
 	float x;
@@ -13,6 +14,15 @@ struct point{
 	}
 	
 	point(int x, int y): x(x), y(y){
+	}
+
+	float distanceTo(point other){
+		point temp(other.x - x, other.y - y);
+		return std::abs(temp.length());
+	}
+
+	float length(){
+		return sqrt(pow(x, 2) + pow(y, 2));
 	}
 };
 
@@ -33,7 +43,7 @@ struct vecData{
 	float length(){
 		return sqrt(pow(x, 2)+pow(y, 2));
 	}
-};
+} typedef velVector;
 
 class Integrations{
 	public:

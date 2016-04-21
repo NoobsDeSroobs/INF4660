@@ -65,13 +65,13 @@ void ReadData::readFromFile(string fileName, bool transpose, string groupName ,
 	file.close();
 }
 
-vector ReadData::getVector(int x, int y){
+velVector ReadData::getVector(int x, int y){
 	if(x < 0 || x >= 500 || y < 0 || y >= 500 ){
 		fprintf(stderr, "Tried to access data %d, %d which is out of bounds\n", x, y);
 	}
 	float xVel = dataXComp[x][y];
 	float yVel = dataYComp[x][y];
-	vector returnVec(xVel, yVel);
+	velVector returnVec(xVel, yVel);
 	returnVec.trueData = true;
 	return returnVec;
 }

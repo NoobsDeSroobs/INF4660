@@ -13,7 +13,9 @@
 #include <string.h>
 #include "SDLRenderer.h"
 #include "ReadData.h"
+#include "Streamline.h"
 #include <cmath>
+#include <queue>
 
 using namespace std;
 
@@ -24,12 +26,16 @@ void Test(SDLRenderer &renderer){
 	renderer.renderImgAtPos(300, 50, 0, 0, 300, 10, 100);
 	renderer.renderToScreen();
 }
-void drawAllPoints(ReadData &data, SDLRenderer& renderer);
+void drawAllArrows(ReadData &data, SDLRenderer& renderer);
+void drawStreamLines(ReadData &data, SDLRenderer& renderer);
+void drawLic(ReadData &data, SDLRenderer& renderer);
 
 //This system is LITTLE ENDIAN!!!!
 int main() {
 	SDLRenderer renderer(500, 500);
 	renderer.setupSDLWindow();
+	SDLRenderer noiseImageRenderer(renderer.SCREEN_WIDTH, renderer.SCREEN_HEIGHT);
+	noiseImageRenderer.setupSDLWindow("Noise Image");
 	renderer.SetTexture("/home/noobsdesroobs/Downloads/arrow.bmp");
 	//Test(renderer);
 
@@ -60,6 +66,9 @@ int main() {
 	    	switch( event.key.keysym.sym ){
 			  case SDLK_DOWN:
 				printf( "Move time forward.\n" );
+				drawLic(isabellData, noiseImageRenderer);
+				noiseImageRenderer.renderToScreen();
+
 				break;
 
 			  case SDLK_UP:
@@ -71,7 +80,7 @@ int main() {
 				RUNNING = false;
 				break;
 			  case SDLK_r:
-				  drawAllPoints(isabellData, renderer);
+				  drawAllArrows(isabellData, renderer);
 				  break;
 
 			  default:
@@ -83,10 +92,11 @@ int main() {
 	}
 	fprintf(stderr, "Finished with the program.");
 	renderer.killSDL();
+	noiseImageRenderer.killSDL();
 	return 0;
 }
 
-void drawAllPoints(ReadData &data, SDLRenderer& renderer){
+void drawAllArrows(ReadData &data, SDLRenderer& renderer){
 	float xPixelStep = renderer.SCREEN_WIDTH/(float)data.getWidth();
 	float yPixelStep = renderer.SCREEN_HEIGHT/(float)data.getHeight();
 	velVector baseVec(1.0f, 0.0f);
@@ -120,4 +130,94 @@ void drawAllPoints(ReadData &data, SDLRenderer& renderer){
 	}
 	renderer.renderToScreen();
 	SDL_SaveBMP(renderer.getMainSurface(), "Isabel.bmp");
+}
+
+bool isIsolated(point seed, float d, Streamline &csl){
+
+		std::vector<point> SLPoints = csl.getCurvePoints();
+		for (uint k = 0; k < SLPoints.size(); ++k) {
+			if(seed.distanceTo(SLPoints[k]) < d){
+				return false;
+			}
+		}
+
+	return true;
+}
+
+void drawStreamLines(ReadData &data, SDLRenderer& renderer){
+	float stepSize = 0.25f;
+	float d = 1;
+	int stride = 10;
+	std::queue<point> seedCandidates;
+	std::vector<Streamline> finishedSLs;
+	std::queue<Streamline> SLQueue;
+
+	//Build candidates
+	for (uint y = 0; y < data.getHeight(); y = y + stride) {
+		for (uint x = 0; x < data.getWidth(); x = x + stride) {
+			seedCandidates.push(point(x, y));
+		}
+	}
+
+	point candidateSeed = seedCandidates.front();
+	seedCandidates.pop();
+	//Compute an initial streamline and make it current.
+	//Queue streamline Queue
+	bool finished = false;
+	bool validCandidate = false;
+
+	Streamline currentStreamLine(candidateSeed.x, candidateSeed.y, 5, false, stepSize, 0);
+	finishedSLs.push_back(currentStreamLine);
+	while(!finished){
+		while(!validCandidate){
+			if(seedCandidates.size() > 0){
+				finished = true;
+				break;
+			}
+			//Select a seedpoint with minimum d distance to current streamline
+			candidateSeed = seedCandidates.front();
+			seedCandidates.pop();
+			if(isIsolated(candidateSeed, d, currentStreamLine)){
+				validCandidate = true;
+			}
+		}
+
+		if(validCandidate){
+			//Compute streamline and add to streamline queue.
+			SLQueue.push(Streamline(candidateSeed.x, candidateSeed.y, false, stepSize, 0));
+			validCandidate = false;
+		}else{
+			if(SLQueue.size() == 0){
+				finished = true;
+			}else{
+				currentStreamLine = SLQueue.front();
+				finishedSLs.push_back(currentStreamLine);
+			}
+		}
+	}
+
+
+	for (uint slIter = 0; slIter < finishedSLs.size(); ++slIter) {
+		Streamline sl = finishedSLs[slIter];
+		std::vector<point> curve = sl.getCurvePoints();
+		for (uint pointIter = 0; pointIter < curve.size()-1; ++pointIter) {
+			renderer.drawLine(curve);
+		}
+	}
+
+}
+
+
+void drawLic(ReadData &data, SDLRenderer& noiseImageRenderer){
+
+	int grey = rand();
+	for (int y = 0; y < noiseImageRenderer.SCREEN_HEIGHT; ++y) {
+		for (int x = 0; x < noiseImageRenderer.SCREEN_WIDTH; ++x) {
+			noiseImageRenderer.PutPixel32_nolock(noiseImageRenderer.getMainSurface(), x, y,
+					noiseImageRenderer.RGBA2INT(grey, grey, grey, grey));
+			grey = rand();
+		}
+	}
+
+
 }

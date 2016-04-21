@@ -54,27 +54,4 @@ void TrailingPoint::render(){
 
 
 
-void Seeder(){
-	//Compute an initial streamline and make it current.
-	int currentStreamline = 0;
-	//Queue streamline Queue
-	bool finished = false;
-	bool validCandidate = false;
-	bool empty = false;
-	while(!finished){
-		while(!empty && !validCandidate){
-			//Select a seedpoint with minimum d distance to current streamline
-		}
 
-		if(validCandidate){
-			//Compute streamline and add to streamline queue.
-		}else{
-			if(true/*Queue is empty*/){
-				finished = true;
-			}else{
-				currentStreamline = 1;//queue.next()
-			}
-		}
-	}
-
-}

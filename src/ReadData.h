@@ -2,21 +2,10 @@
 #include <H5Cpp.h>
 #include <math.h>
 #include <vector>
+#include "Integration.h"
 using std::string;
 
-struct vector{
-	float x;
-	float y;
-	bool trueData;
 
-	vector(float x, float y): x(x), y(y), trueData(false){
-
-	}
-
-	float length(){
-		return sqrt(pow(x, 2)+pow(y, 2));
-	}
-} typedef velVector;
 
 class ReadData{
 	unsigned int width;
