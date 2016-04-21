@@ -1,5 +1,5 @@
-#ifndef INTEGRATION
-#define INTEGRATION
+#ifndef INTEGRATIONS
+#define INTEGRATIONS
 
 #include <math.h>
 

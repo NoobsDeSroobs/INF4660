@@ -5,11 +5,12 @@
 using std::vector;
 
 #include "Integration.h"
+#include "ReadData.h"
 
 class Streamline{
 	public:
 		Streamline(int x, int y, int length, bool biDirectional, float stepSize,
-				   int euler = 0);
+				   int euler, ReadData reader);
 		virtual ~Streamline();
 		
 		int getLength();
@@ -19,10 +20,12 @@ class Streamline{
 		bool isBiDirectional();
 		
 	private:
+		ReadData reader;
+		
 		int length;
 		float stepSize;
 		bool biDirectional;
-		int euler;
+		int euler = 0;
 		
 		point startPoint;
 		vector<point> curveForwardPoints;
@@ -31,6 +34,8 @@ class Streamline{
 		void calcCurve();
 		
 		vecData findVectorDataForPoint(point pixelPoint);
+		vecData getVectorData(int x, int y);
+		vecData interpolateVectorData(int x1, int x2, int y1, int y2, int x, int y);
 };
 
 #endif

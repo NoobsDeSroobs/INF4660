@@ -1,14 +1,16 @@
 #include "Streamline.h"
 
 #include "Integration.h"
+#include "ReadData.h"
 
 Streamline::Streamline(int x, int y, int length, bool biDirectional, float stepSize,
-					   int euler){
+					   int euler, ReadData reader){
 	startPoint = point(x, y);
 	this->length = length;
 	this->biDirectional = biDirectional;
 	this->stepSize = stepSize;
 	this->euler = euler;
+	this->reader = reader;
 	
 	calcCurve();
 }
@@ -61,44 +63,38 @@ vecData Streamline::findVectorDataForPoint(point dataPoint){
 	}
 	
 	//Otherwise they need to be interpolated
-	Q1y
-	Q2y
+	int x1 = (int)dataPoint.x;
+	int x2 = (int)dataPoint.x + 1;
+	int y1 = (int)dataPoint.y;
+	int y2 = (int)dataPoint.y + 1;
 	
-	Qx1
-	Qx2
-	
-	
-	
-	
-	
-	
-	vecData interpolateFieldValues(int x1, int x2, int y1, int y2, int x, int y){
-		ReadData reader;
-		
-		vecData result;
-		vecData Q11 = reader.getVector(x1, y1);
-		vecData Q12 = reader.getVector(x1, y2);
-		vecData Q21 = reader.getVector(x2, y1);
-		vecData Q22 = reader.getVector(x2, y2);
-		
-		//X component
-		float V_xy1 = (x2 - x) / (x2 - x1) * Q11.x + (x - x1) / (x2 - x1) * Q21.x;
-		float V_xy2 = (x2 - x) / (x2 - x1) * Q12.x + (x - x1) / (x2 - x1) * Q22.x;
-		
-		result.x = (y2 - y) / (y2 - y1) * V_xy1 + (y - y1) / (y2 - y1) * V_xy2;
-		 
-		//Y component
-		V_xy1 = (x2 - x) / (x2 - x1) * Q11.x + (x - x1) / (x2 - x1) * Q21.x;
-		V_xy2 = (x2 - x) / (x2 - x1) * Q12.x + (x - x1) / (x2 - x1) * Q22.x;
-		
-		result.y = (y2 - y) / (y2 - y1) * V_xy1 + (y - y1) / (y2 - y1) * V_xy2;
-		
-		result.trueData = false;
-		return result;
-	}
+	return interpolateVectorData(x1, x2, y1, y2, dataPoint.x, dataPoint.y);
 }
 
 
-vecData getVectorData(int x, int y){
+vecData Streamline::getVectorData(int x, int y){
 	return vecData(10, 5);
+}
+
+vecData Streamline::interpolateVectorData(int x1, int x2, int y1, int y2, int x, int y){
+	vecData result;
+	vecData Q11 = reader.getVector(x1, y1);
+	vecData Q12 = reader.getVector(x1, y2);
+	vecData Q21 = reader.getVector(x2, y1);
+	vecData Q22 = reader.getVector(x2, y2);
+	
+	//X component
+	float V_xy1 = (x2 - x) / (x2 - x1) * Q11.x + (x - x1) / (x2 - x1) * Q21.x;
+	float V_xy2 = (x2 - x) / (x2 - x1) * Q12.x + (x - x1) / (x2 - x1) * Q22.x;
+	
+	result.x = (y2 - y) / (y2 - y1) * V_xy1 + (y - y1) / (y2 - y1) * V_xy2;
+	 
+	//Y component
+	V_xy1 = (x2 - x) / (x2 - x1) * Q11.x + (x - x1) / (x2 - x1) * Q21.x;
+	V_xy2 = (x2 - x) / (x2 - x1) * Q12.x + (x - x1) / (x2 - x1) * Q22.x;
+	
+	result.y = (y2 - y) / (y2 - y1) * V_xy1 + (y - y1) / (y2 - y1) * V_xy2;
+	
+	result.trueData = false;
+	return result;
 }
