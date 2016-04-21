@@ -8,7 +8,6 @@ ReadData::~ReadData(){}
 
 void ReadData::readFromFile(string fileName, bool transpose, string groupName ,
 							string compXName , string compYName){
-	
 	cout << "Reading from file: " << fileName << endl;
 	H5::H5File file (fileName, H5F_ACC_RDONLY);
 	H5::Group velocity = file.openGroup(groupName);
