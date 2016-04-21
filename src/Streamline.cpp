@@ -4,12 +4,12 @@
 #include "ReadData.h"
 
 Streamline::Streamline(int x, int y, int length, bool biDirectional, float stepSize,
-					   int euler, ReadData reader){
+					   INTEGRATION_METHOD integration, ReadData &reader){
 	startPoint = point(x, y);
 	this->length = length;
 	this->biDirectional = biDirectional;
 	this->stepSize = stepSize;
-	this->euler = euler;
+	this->integration = integration;
 	this->reader = reader;
 	
 	calcCurve();
@@ -18,6 +18,9 @@ Streamline::~Streamline(){
 	
 }
 
+std::vector<point> Streamline::getCurvePoints(){
+	return std::vector<point>();
+}
 int Streamline::getLength(){
 	return length;
 }
@@ -32,74 +35,22 @@ void Streamline::calcCurve(){
 	
 	incBackward = incForward = startPoint;
 	for(int i = 0; i < length; i++){
-		activeVector = findVectorDataForPoint(incForward);
-		if(euler == 0){
-			incForward = Integrations::ForwardEuler(incForward, activeVector, stepSize);
+		if(integration == EULER){
+			incForward = Integrations::ForwardEuler(incForward, reader, stepSize);
 		}
 		else{
-			incForward = Integrations::RungeKutta(incForward, activeVector, stepSize);
+			incForward = Integrations::RungeKutta(incForward, reader, stepSize);
 		}
 		curveForwardPoints[i] = point(incForward.x, incForward.y);
 		
 		if(biDirectional){
-			activeVector = findVectorDataForPoint(incBackward);
-			if(euler == 0){
-				incBackward = Integrations::ForwardEuler(incForward, activeVector, stepSize);
+			if(integration == EULER){
+				incBackward = Integrations::ForwardEuler(incBackward, reader, -stepSize);
 			}
 			else{
-				incBackward = Integrations::RungeKutta(incForward, activeVector, stepSize);
+				incBackward = Integrations::RungeKutta(incBackward, reader, -stepSize);
 			}
 			curveBackwardPoints[i] = point(incBackward.x, incBackward.y);
 		}
 	}
-}
-
-vecData Streamline::findVectorDataForPoint(point dataPoint){
-	//Assumes given point coords are in the vector field coordinates
-	//As such, if both x and y are integers, then they are  a known 
-	//field value. 
-	if((dataPoint.x - (int)dataPoint.x == 0.0f) && (dataPoint.y - (int)dataPoint.y) == 0.0f){
-		return vecData(4, 4);//getVectorData(dataPoint.x, dataPoint.y);
-	}
-	
-	//Otherwise they need to be interpolated
-
-	int x1 = (int)dataPoint.x;
-	int x2 = (int)dataPoint.x + 1;
-	int y1 = (int)dataPoint.y;
-	int y2 = (int)dataPoint.y + 1;
-	
-	return interpolateVectorData(x1, x2, y1, y2, dataPoint.x, dataPoint.y);
-}
-
-std::vector<point> Streamline::getCurvePoints(){
-	return std::vector<point>();
-}
-
-vecData Streamline::getVectorData(int x, int y){
-	return vecData(10, 5);
-}
-
-
-vecData Streamline::interpolateVectorData(int x1, int x2, int y1, int y2, int x, int y){
-	vecData result;
-	vecData Q11 = reader.getVector(x1, y1);
-	vecData Q12 = reader.getVector(x1, y2);
-	vecData Q21 = reader.getVector(x2, y1);
-	vecData Q22 = reader.getVector(x2, y2);
-	
-	//X component
-	float V_xy1 = (x2 - x) / (x2 - x1) * Q11.x + (x - x1) / (x2 - x1) * Q21.x;
-	float V_xy2 = (x2 - x) / (x2 - x1) * Q12.x + (x - x1) / (x2 - x1) * Q22.x;
-	
-	result.x = (y2 - y) / (y2 - y1) * V_xy1 + (y - y1) / (y2 - y1) * V_xy2;
-	 
-	//Y component
-	V_xy1 = (x2 - x) / (x2 - x1) * Q11.x + (x - x1) / (x2 - x1) * Q21.x;
-	V_xy2 = (x2 - x) / (x2 - x1) * Q12.x + (x - x1) / (x2 - x1) * Q22.x;
-	
-	result.y = (y2 - y) / (y2 - y1) * V_xy1 + (y - y1) / (y2 - y1) * V_xy2;
-	
-	result.trueData = false;
-	return result;
 }

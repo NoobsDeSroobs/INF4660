@@ -9,7 +9,7 @@
 #define _USE_MATH_DEFINES
 #include <stdio.h>
 #include <iostream>
-#include <H5Cpp.h>
+//#include <H5Cpp.h>
 #include <string.h>
 #include "SDLRenderer.h"
 #include "ReadData.h"
@@ -167,7 +167,7 @@ void drawStreamLines(ReadData &data, SDLRenderer& renderer){
 	bool finished = false;
 	bool validCandidate = false;
 
-	Streamline currentStreamLine(candidateSeed.x, candidateSeed.y, length, false, stepSize, 0, data);
+	Streamline currentStreamLine(candidateSeed.x, candidateSeed.y, length, false, stepSize, EULER, data);
 	finishedSLs.push_back(currentStreamLine);
 	while(!finished){
 		while(!validCandidate){
@@ -185,7 +185,7 @@ void drawStreamLines(ReadData &data, SDLRenderer& renderer){
 
 		if(validCandidate){
 			//Compute streamline and add to streamline queue.
-			SLQueue.push(Streamline(candidateSeed.x, candidateSeed.y, length, false, stepSize, 0, data));
+			SLQueue.push(Streamline(candidateSeed.x, candidateSeed.y, length, false, stepSize, EULER, data));
 			validCandidate = false;
 		}else{
 			if(SLQueue.size() == 0){

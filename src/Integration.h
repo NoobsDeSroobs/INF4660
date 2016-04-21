@@ -1,8 +1,8 @@
 #ifndef INTEGRATIONS
 #define INTEGRATIONS
 
-#include <math.h>
 #include <cmath>
+class ReadData;
 
 struct point{
 	float x;
@@ -47,9 +47,13 @@ struct vecData{
 
 class Integrations{
 	public:
-		static point ForwardEuler(point u_n, vecData vComp, float stepSize);
+		static point ForwardEuler(point u_prev, ReadData &reader, float stepSize);
+		static point RungeKutta(point u_prev, ReadData &reader, float stepSize);
 		
-		static point RungeKutta(point u_n, vecData vComp, float stepSize);
+	private:
+		static vecData findVectorDataForPoint(point dataPoint, ReadData &reader);
+		static vecData interpolateVectorData(int x1, int x2, int y1, int y2, int x, int y,
+											 ReadData &reader);
 };
 
 #endif
