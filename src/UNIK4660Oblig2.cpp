@@ -9,14 +9,14 @@
 #define _USE_MATH_DEFINES
 #include <stdio.h>
 #include <iostream>
-//#include <H5Cpp.h>
+#include <H5Cpp.h>
 #include <string.h>
 #include "SDLRenderer.h"
 #include "ReadData.h"
 #include "Streamline.h"
 #include <cmath>
 #include <queue>
-
+#include <vector>
 using namespace std;
 
 
@@ -29,6 +29,13 @@ void Test(SDLRenderer &renderer){
 void drawAllArrows(ReadData &data, SDLRenderer& renderer);
 void drawStreamLines(ReadData &data, SDLRenderer& renderer);
 void drawLic(ReadData &data, SDLRenderer& renderer);
+
+//New methods, must be merged with the others
+//SDL_Texture createNoiseTexture(int width, int height);
+float* createWeightLUT(int size);
+float convolution(point pixelPoint);
+void doLICLoop();
+
 
 //This system is LITTLE ENDIAN!!!!
 int main() {
@@ -208,7 +215,6 @@ void drawStreamLines(ReadData &data, SDLRenderer& renderer){
 
 }
 
-
 void drawLic(ReadData &data, SDLRenderer& noiseImageRenderer){
 
 	int grey = rand();
@@ -222,3 +228,156 @@ void drawLic(ReadData &data, SDLRenderer& noiseImageRenderer){
 
 
 }
+
+//Creates the input noise image texture
+void createNoiseImage(int width, int height){
+	/*
+	SDL_Renderer noiseTexture(widt, height);
+	int grey;
+	
+	for (int i = 0; i < width; i++) {
+		for (int j = 0; j < width; j++) {
+			grey = rand();
+			
+			//No idea what is correct here!
+			noiseTexture.PutPixel32_nolock(noiseTexture.getMainSurface(), x, y,
+					noiseTexture.RGBA2INT(grey, grey, grey, grey));
+		}
+	}
+	 * */
+}
+//Creates the weight function as a look up table
+float* createWeightLUT(int size){
+	float *lut;
+	for(int i = 0; i < size; i++){
+		lut[i] = i;
+	}
+	
+	return lut;
+}
+//Returns the intensity of the pixel that is being convoluted
+float convolutionStartPoint(Streamline &stream, float* weightLUT, 
+						   vector<vector<int> > &contributors, 
+						   vector<vector<float> > &noiseTexture,
+						   vector<vector<float> > &outputImage){
+	
+	float weightAccumulator = 0.0;
+	float texAccumulator = 0.0;
+	
+	//Build accumulators
+	for(auto &p : stream.getCurvePoints()){
+		float pointWeight = 1; //weightLUT[] //Ignore weight for now, just use average, 
+											 //is this the same as a constant filter kernel
+		weightAccumulator += pointWeight; 
+		texAccumulator += noiseTexture[p.x][p.y] * pointWeight;
+	}
+	
+	//Set intensity
+	point p = stream.getStartPoint();
+	float intensity = texAccumulator / weightAccumulator;
+	outputImage[p.x][p.y] = intensity;
+	contributors[p.x][p.y]++;
+	
+	return intensity;
+}
+void convolutionForwards(float startI, Streamline stream, float* weightLUT,
+						 vector<vector<int> > &contributors, 
+						 vector<vector<float> > &noiseTexture,
+						 vector<vector<float> > &outputImage){
+	
+	float prevI = startI;
+	
+	//Build accumulators
+	for(int i = 0; i < stream.getCurveForwardPoints().size(); i++){
+		point p = stream.getCurveForwardPoints()[i];
+		
+		float weight = 1;
+		float texAccumulator = 0.0;
+		
+		float intensity = prevI + weight*(noiseTexture[i][i] - noiseTexture[i][i]);
+		//1 can be replaced by the 
+		
+		
+		prevI = intensity;
+	}
+	
+	//Set intensity
+	point p = stream.getStartPoint();
+	//outputImage[p.x][p.y] = texAccumulator / weightAccumulator;
+	contributors[p.x][p.y]++;
+	
+	
+	
+	
+	
+
+	float weightAccumulator = 0.0;
+	float texAccumulator = 0.0;
+	
+	outputImage[p.x][p.y] = startI + (texAccumulator / weightAccumulator);
+}
+void convolutionBackwards(float startI, Streamline stream, float* weightLUT,
+						  vector<vector<int> > &contributors, 
+						  vector<vector<float> > &noiseTexture,
+						  vector<vector<float> > &outputImage){
+	for(auto &p : stream.getCurvePoints()){
+		
+	}
+}
+
+//Loop for LIC
+void doLICLoop(int dataset, int squareRes, int weightSize){
+	//Read the vector data
+	ReadData reader;
+	string isabelPath = "/home/noobsdesroobs/Downloads/isabel_2d.h5";
+	string metsimPath = "/home/noobsdesroobs/Downloads/metsim1_2d.h5";
+	string vectorFieldFile = (dataset == 0) ? isabelPath : metsimPath;
+	bool transpose = (dataset == 0) ? true : false;
+	reader.readFromFile(vectorFieldFile, transpose);
+	
+	//Create noise and output image -TODO
+		//createNoiseTexture(squareResolution, squareResolution);
+	//outputImage = SDL_Texture(size, size); = 0 for all x,y
+	vector<vector<float> > noiseTexture(squareRes, vector<float>(squareRes, 0));
+	vector<vector<float> > outputImage(squareRes, vector<float>(squareRes, 0));
+	
+	//Variables
+	int streamLength = squareRes * 0.20;
+	float stepSize = 0.5f;
+	bool bidirectional = true;
+	
+	//Create weight/kernel function
+	float *weightLUT;
+	weightLUT = createWeightLUT(streamLength * 2);
+	
+	//Fast LIC counter
+	int maxContributors = 10;
+	vector<vector<int> > contributors(squareRes, vector<int>(squareRes, 0));
+	
+	//Loop
+	for(int x = 1; x <= squareRes; x++){
+		for(int y = 1; y <= squareRes; y++){
+			if(contributors[x][y] >= maxContributors){
+				continue;
+			}
+			
+			//Find streamline for current point
+			Streamline stream(x, y, streamLength, bidirectional, stepSize, EULER, reader);
+			
+			//Fast LIC, convolves both for current, backwards and forwards
+			float intensity = 
+				convolutionStartPoint(stream, weightLUT, contributors, noiseTexture, outputImage);
+			convolutionForwards(intensity, stream, weightLUT, 
+								contributors, noiseTexture, outputImage);
+			convolutionBackwards(intensity, stream, weightLUT, 
+								 contributors, noiseTexture, outputImage);
+		}
+	}
+	for(int x = 1; x <= squareRes; x++){
+		for(int y = 1; y <= squareRes; y++){
+			outputImage[x][y] /= contributors[x][y];
+		}
+	}
+}
+
+
