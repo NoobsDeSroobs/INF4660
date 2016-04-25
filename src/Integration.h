@@ -51,7 +51,7 @@ class Integrations{
 		static point RungeKutta(point u_prev, ReadData &reader, float stepSize);
 		
 	private:
-		static vecData findVectorDataForPoint(point dataPoint, ReadData &reader);
+		static bool findVectorDataForPoint(point dataPoint, vecData &returnVec, ReadData &reader);
 		static vecData interpolateVectorData(int x1, int x2, int y1, int y2, int x, int y,
 											 ReadData &reader);
 };

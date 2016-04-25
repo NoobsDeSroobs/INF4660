@@ -5,7 +5,11 @@
 point Integrations::ForwardEuler(point u_prev, ReadData &reader, float stepSize){
 	point u = point();
 	
-	vecData vData = findVectorDataForPoint(u_prev, reader);
+	vecData vData;
+	if(!findVectorDataForPoint(u_prev, vData, reader)){
+		return u_prev;
+	}
+	
 	vecData vecNorm = vecData(vData.x / vData.length(), vData.y / vData.length());
 	
 	u.x = u_prev.x + stepSize * vecNorm.x;
@@ -20,25 +24,33 @@ point Integrations::RungeKutta(point u_prev, ReadData &reader, float stepSize){
 	vecData vData, vecNorm;
 	
 	//Find, normalize and treat the vector for each k step
-	vData = findVectorDataForPoint(u_prev, reader);
+	if(!findVectorDataForPoint(u_prev, vData, reader)){
+		return u_prev;
+	}
 	vecNorm = vecData(vData.x / vData.length(), vData.y / vData.length());
 	point k_1 = point(vecNorm.x * stepSize, vecNorm.y * stepSize);
 	
 	tempStep.x = u_prev.x + k_1.x * 0.5; 
 	tempStep.y = u_prev.y + k_1.y * 0.5; 
-	vData = findVectorDataForPoint(tempStep, reader);
+	if(!findVectorDataForPoint(tempStep, vData, reader)){
+		return u_prev;
+	}
 	vecNorm = vecData(vData.x / vData.length(), vData.y / vData.length());
 	point k_2 = point(vecNorm.x * stepSize, vecNorm.y * stepSize);
 	
 	tempStep.x = u_prev.x + k_2.x * 0.5; 
 	tempStep.y = u_prev.y + k_2.y * 0.5; 
-	vData = findVectorDataForPoint(tempStep, reader);
+	if(!findVectorDataForPoint(tempStep, vData, reader)){
+		return u_prev;
+	}
 	vecNorm = vecData(vData.x / vData.length(), vData.y / vData.length());
 	point k_3 = point(vecNorm.x * stepSize, vecNorm.y * stepSize);
 	
 	tempStep.x = u_prev.x + k_3.x; 
 	tempStep.y = u_prev.y + k_3.y; 
-	vData = findVectorDataForPoint(tempStep, reader);
+	if(!findVectorDataForPoint(tempStep, vData, reader)){
+		return u_prev;
+	}
 	vecNorm = vecData(vData.x / vData.length(), vData.y / vData.length());
 	point k_4 = point(vecNorm.x * stepSize, vecNorm.y * stepSize);
 	
@@ -48,21 +60,30 @@ point Integrations::RungeKutta(point u_prev, ReadData &reader, float stepSize){
 	return u;
 }
 
-vecData Integrations::findVectorDataForPoint(point dataPoint, ReadData &reader){
+bool Integrations::findVectorDataForPoint(point dataPoint, vecData &returnVec, ReadData &reader){
 	//Assumes given point coords are in the vector field coordinates
 	//As such, if both x and y are integers, then it is a known 
 	//field value. 
 	if((dataPoint.x - (int)dataPoint.x == 0.0f) && (dataPoint.y - (int)dataPoint.y) == 0.0f){
-		return reader.getVector(dataPoint.x, dataPoint.y);
+		returnVec = reader.getVector(dataPoint.x, dataPoint.y);
+		return true;
 	}
 	
 	//Otherwise they need to be interpolated
-	int x1 = (int)dataPoint.x;
-	int x2 = (int)dataPoint.x + 1;
-	int y1 = (int)dataPoint.y;
-	int y2 = (int)dataPoint.y + 1;
+	unsigned int x1 = (unsigned int)dataPoint.x;
+	unsigned int x2 = (unsigned int)dataPoint.x + 1;
+	unsigned int y1 = (unsigned int)dataPoint.y;
+	unsigned int y2 = (unsigned int)dataPoint.y + 1;
 	
-	return interpolateVectorData(x1, x2, y1, y2, dataPoint.x, dataPoint.y, reader);
+	//If either x2 or y2 are outside the vector field, then the calculations must
+	//stop here.
+	if(x2 > reader.getWidth() || y2 > reader.getHeight()){
+		return false;
+	}
+	
+	
+	returnVec = interpolateVectorData(x1, x2, y1, y2, dataPoint.x, dataPoint.y, reader);
+	return true;
 }
 vecData Integrations::interpolateVectorData(int x1, int x2, int y1, int y2, int x, int y,
 											ReadData &reader){

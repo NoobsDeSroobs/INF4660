@@ -23,12 +23,14 @@ class Streamline{
 		vector<point> &getCurvePoints();
 		
 		bool isBiDirectional();
+		bool isCriticalPoint();
 		
 	private:
 		ReadData reader;
 		int length;
 		float stepSize;
 		bool biDirectional;
+		bool criticalPoint;
 		INTEGRATION_METHOD integration;
 		
 		point startPoint;

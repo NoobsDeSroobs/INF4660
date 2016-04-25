@@ -12,7 +12,15 @@ Streamline::Streamline(int x, int y, int length, bool biDirectional, float stepS
 	this->integration = integration;
 	this->reader = reader;
 	
-	calcCurve();
+	//Critical point handling and curve calculation
+	vecData vec = reader.getVector(x, y);
+	if(vec.x == 0 && vec.y == 0){
+		criticalPoint = true;
+	}
+	else{
+		criticalPoint = false;
+		calcCurve();
+	}
 }
 Streamline::~Streamline(){
 	
@@ -37,31 +45,50 @@ int Streamline::getLength(){
 bool Streamline::isBiDirectional(){
 	return biDirectional;
 }
+bool Streamline::isCriticalPoint(){
+	return criticalPoint;
+}
+
 void Streamline::calcCurve(){
-	point incForward, incBackward;
+	point increment, tempIncr;
 	curveForwardPoints.resize(length-1, point());
 	curveBackwardPoints.resize(length-1, point());
 	
-	incBackward = incForward = startPoint;
-	for(uint i = 0; i < length; i++){
+
+	increment = startPoint;
+	for(int i = 0; i < length; i++){
+		tempIncr = increment;
 		if(integration == EULER){
-			incForward = Integrations::ForwardEuler(incForward, reader, stepSize);
-		}else{
-			incForward = Integrations::RungeKutta(incForward, reader, stepSize);
+			increment = Integrations::ForwardEuler(increment, reader, stepSize);
 		}
-		curveForwardPoints[i] = point(incForward.x, incForward.y);
+		else{
+			increment = Integrations::RungeKutta(increment, reader, stepSize);
+		}
 		
-		if(biDirectional){
-			if(integration == EULER){
-				incBackward = Integrations::ForwardEuler(incBackward, reader, -stepSize);
-			}
-			else{
-				incBackward = Integrations::RungeKutta(incBackward, reader, -stepSize);
-			}
-			curveBackwardPoints[i] = point(incBackward.x, incBackward.y);
+		if(increment.x == tempIncr.x && increment.y == tempIncr.y){
+			break;//End point, do not store more of, or continue this direction
 		}
+		curveForwardPoints[i] = point(increment.x, increment.y);
 	}
 	
+	increment = startPoint;
+	for(int i = 0; i < length; i++){
+		tempIncr = increment;
+		if(biDirectional){
+			if(integration == EULER){
+				increment = Integrations::ForwardEuler(increment, reader, -stepSize);
+			}
+			else{
+				increment = Integrations::RungeKutta(increment, reader, -stepSize);
+			}
+			
+			
+			if(increment.x == tempIncr.x && increment.y == tempIncr.y){
+				break;//End point, do not store more of, or continue this direction
+			}
+			curveBackwardPoints[i] = point(increment.x, increment.y);
+		}
+	}
 
 	fprintf(stderr, "Before backwards print:\n");
 	for (int i = curveBackwardPoints.size()-1; i >= 0; --i) {
