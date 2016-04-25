@@ -20,37 +20,28 @@
 #include <unistd.h>
 using namespace std;
 
-
-void Test(SDLRenderer &renderer){
-	renderer.SetTexture("/home/noobsdesroobs/Downloads/arrow.bmp");
-	renderer.renderImgAtPos(50, 50, 0, 0, 300, 10, 45);
-	renderer.renderImgAtPos(300, 50, 0, 0, 300, 10, 100);
-	renderer.renderToScreen();
-}
 void drawAllArrows(ReadData &data, SDLRenderer& renderer);
 void drawStreamLines(ReadData &data, SDLRenderer& renderer);
 void drawLic(ReadData &data, SDLRenderer& renderer);
-
-//New methods, must be merged with the others
-//SDL_Texture createNoiseTexture(int width, int height);
-float* createWeightLUT(int size);
-float convolution(WMpoint pixelPoint);
-void doLICLoop(int dataset, int squareRes, int weightSize);
+float convolutionStartPoint(Streamline &stream, float weightLUT, 
+			vector<vector<int> > &contributors, vector<vector<float> > const &noiseTexture,
+			vector<vector<float> > &outputImage);
+void convolutionFwdAndBwd(float startI, Streamline stream, float weightLUT,
+			vector<vector<int> > &contributors, vector<vector<float> > const &noiseTexture,
+			vector<vector<float> > &outputImage);
+void doLICLoop(ReadData &dataset, SDLRenderer &renderer);
 
 void calculateRandomStreamLine(ReadData &data, SDLRenderer &renderer){
-	int length = 5000;
-
-//282, 382
-
-	int stride = 500/10;
+	int length = 50;
+	int stride = 500/8;
 	float dataToPixelCoord = renderer.SCREEN_HEIGHT/data.getHeight();
-	for (int y = 0; y < 500; y = y + stride) {
-		for (int x = 0; x < 500; x = x + stride) {
-			Streamline stream(x, y, length, false, 0.25,
-						   EULER, data);
+	for (int y = 50; y < 500; y = y + stride) {
+		for (int x = 50; x < 500; x = x + stride) {
+			Streamline stream(x, y, length, true, 0.25, EULER, data);
+			
 			vector<WMpoint> curve = stream.getCurvePoints();
 			fprintf(stderr, "Seed x: %d, y: %d\n", x, y);
-			if(curve.size() > 10){
+			if(curve.size() > 10 && !stream.isCriticalPoint()){
 				for (uint var = 0; var < curve.size(); ++var) {
 					//fprintf(stderr, "CurvePoint %d: <%f, %f>\n", var, curve[var].x, curve[var].y);
 					curve[var].x = curve[var].x*dataToPixelCoord;
@@ -69,58 +60,66 @@ int main() {
 	renderer.setupSDLWindow();
 	//SDLRenderer noiseImageRenderer(renderer.SCREEN_WIDTH, renderer.SCREEN_HEIGHT);
 	//noiseImageRenderer.setupSDLWindow("Noise Image", true);
-	renderer.SetTexture("/home/noobsdesroobs/Downloads/arrow.bmp");
-	//Test(renderer);
+	renderer.SetTexture("/home/wilhelm/Downloads/arrow.bmp");
 
-	string isabellPath = "/home/noobsdesroobs/Downloads/isabel_2d.h5";
-	string metsimPath = "/home/noobsdesroobs/Downloads/metsim1_2d.h5";
+	string isabellPath = "/home/wilhelm/Downloads/data/isabel_2d.h5";
+	string metsimPath = "/home/wilhelm/Downloads/data/metsim1_2d.h5";
 
 	ReadData isabellData;
 	isabellData.readFromFile(isabellPath, true);
 	ReadData metsimData;
 	metsimData.readFromFile(metsimPath, false);
-
+	
 	bool RUNNING = true;
 	/* An SDL_Event */
     SDL_Event event;
 	while(RUNNING)
 	{
-	    while(SDL_PollEvent(&event))
-	    {
+		while(SDL_PollEvent(&event))
+		{
 
-	    	if(event.type == SDL_QUIT){
-	    		RUNNING = false;
-	    	}
+			if(event.type == SDL_QUIT){
+				RUNNING = false;
+			}
 
-	    	/* If a quit event has been sent */
-	    	if(event.type == SDL_KEYDOWN){
+			/* If a quit event has been sent */
+			if(event.type == SDL_KEYDOWN){
 				switch( event.key.keysym.sym ){
 				  case SDLK_DOWN:
-					printf( "Move time forward.\n" );
 					calculateRandomStreamLine(isabellData, renderer);
 					//drawStreamLines(isabellData, noiseImageRenderer);
 					//noiseImageRenderer.renderToScreen();
-
 					break;
-
-				  case SDLK_UP:
-					printf( "Move time backwards.\n" );
+					
+					case SDLK_ESCAPE:
+						/* Quit the application */
+						RUNNING = false;
+						break;
+					case SDLK_r:
+					drawAllArrows(isabellData, renderer);
 					break;
-
-				  case SDLK_ESCAPE:
-					/* Quit the application */
-					RUNNING = false;
-					break;
-				  case SDLK_r:
-					  drawAllArrows(isabellData, renderer);
-					  break;
-
-				  case SDLK_d:
+					
+					case SDLK_d:
 						renderer.renderToScreen();
 						SDL_SaveBMP(renderer.getMainSurface(), "Isabel.bmp");
 						break;
-				  default:
-
+					
+					case SDLK_c:
+						renderer.clear();
+						renderer.renderToScreen();
+					default:
+					
+					case SDLK_i:
+						renderer.clear();
+						doLICLoop(isabellData, renderer);
+						renderer.renderToScreen();
+						SDL_SaveBMP(renderer.getMainSurface(), "Isabel.bmp");
+					case SDLK_m:
+						renderer.clear();
+						doLICLoop(metsimData, renderer);
+						renderer.renderToScreen();
+						SDL_SaveBMP(renderer.getMainSurface(), "Metsim.bmp");
+					
 					break;
 				 }
 	    	}
@@ -267,14 +266,14 @@ void drawLic(ReadData &data, SDLRenderer& noiseImageRenderer){
 
 //Creates the input noise image texture
 void createNoiseTexture(int width, int height, vector<vector<float>> &img){
-	Uint32 grey;
+	float greyscale;
 	
-	for (int i = 0; i < height; i++) {
-		for (int j = 0; j < width; j++) {
-			grey = rand();
+	for(int i = 0; i < height; i++) {
+		for(int j = 0; j < width; j++) {
+			greyscale = ((float) rand() / RAND_MAX);
 			
 			//No idea what is correct here!
-			img[i][j] = grey;
+			img[i][j] = greyscale;
 		}
 	}
 }
@@ -358,62 +357,59 @@ void convolutionFwdAndBwd(float startI, Streamline stream, float weightLUT,
 	}
 }
 //Loop for LIC
-void doLICLoop(int dataset, int squareRes, int weightSize){
-	//Read the vector data
-	ReadData reader;
-	//string isabelPath = "/home/noobsdesroobs/Downloads/isabel_2d.h5";
-	//string metsimPath = "/home/noobsdesroobs/Downloads/metsim1_2d.h5";
-	//string vectorFieldFile = (dataset == 0) ? isabelPath : metsimPath;
-	//bool transpose = (dataset == 0) ? true : false;
-	//reader.readFromFile(vectorFieldFile, transpose);
-
-	vector<vector<float> > noiseTexture(squareRes, vector<float>(squareRes, 0));
+void doLICLoop(ReadData &dataset, SDLRenderer &renderer){
+	//Run variables:
+	int squareRes = 500;
+	bool bidirectional = true;
+	float stepSize = 0.5f;
+	INTEGRATION_METHOD inter = EULER;
+	
+	//Create noise and output image
 	vector<vector<float> > outputImage(squareRes, vector<float>(squareRes, 0));
-	//Create noise and output image -TODO
-		createNoiseTexture(squareRes, squareRes, noiseTexture);
-		diplayIMGArray(noiseTexture);
-		return;
-	//outputImage = SDL_Texture(size, size); = 0 for all x,y
+	vector<vector<float> > noiseTexture(squareRes, vector<float>(squareRes, 0));
+	createNoiseTexture(squareRes, squareRes, noiseTexture);
 	
 	//Variables
 	int streamLength = squareRes * 0.20;
-	float stepSize = 0.5f;
-	bool bidirectional = true;
-	
-	//Create weight/kernel function
-
 	float weightLUT = 1; //We only use a simple box filter for now
 	
-	//Fast LIC counter
+	//Fast LIC counters
 	int maxContributors = 10;
 	vector<vector<int> > contributors(squareRes, vector<int>(squareRes, 0));
 	
 	//Loop
-	for(int x = 1; x <= squareRes; x++){
-		for(int y = 1; y <= squareRes; y++){
+	for(int x = 0; x < squareRes; x++){
+		for(int y = 0; y < squareRes; y++){
 			if(contributors[x][y] >= maxContributors){
 				continue;
 			}
 			
 			//Find streamline for current point
-			Streamline stream(x, y, streamLength, bidirectional, stepSize, EULER, reader);
-			if(stream.isCriticalPoint()) continue;
+			Streamline stream(x, y, streamLength, bidirectional, stepSize, inter, dataset);
+			if(stream.isCriticalPoint()){
+				outputImage[x][y] = 0;
+				contributors[x][y] = maxContributors;
+				continue;
+			}
 			
 			//Fast LIC, convolves both for current, backwards and forwards
 			//First start point of the streamline, uses the entire streamline
 			float intensity = convolutionStartPoint(stream, weightLUT, contributors, 
 				noiseTexture, outputImage);
-			
+				
 			//Then forwards and backwards, only halfway up and down
 			convolutionFwdAndBwd(intensity, stream, weightLUT, contributors, noiseTexture, 
 				outputImage);
 			}
 		}
 	
-	//Normalize the value
-	for(int x = 1; x <= squareRes; x++){
-		for(int y = 1; y <= squareRes; y++){
+	//Normalize the values and paint
+	for(int x = 0; x < squareRes; x++){
+		for(int y = 0; y < squareRes; y++){
 			outputImage[x][y] /= contributors[x][y];
+			
+			int c = (int) (outputImage[x][y]*255);
+			renderer.PutPixel32_nolock(renderer.getMainSurface(), x, y, renderer.RGBA2INT(c,c,c,255));
 		}
 	}
 }

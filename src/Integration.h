@@ -30,13 +30,14 @@ struct vecData{
 	float x;
 	float y;
 	bool trueData;
+	bool isValid;
 	
 	vecData(){
 		x = 0;
 		y = 0;
 		trueData = false;
 	}
-	vecData(float x, float y): x(x), y(y), trueData(false){
+	vecData(float x, float y): x(x), y(y), trueData(false), isValid(true){
 	
 	}
 	

@@ -84,6 +84,7 @@ bool Integrations::findVectorDataForPoint(WMpoint dataPoint, vecData &returnVec,
 	
 
 	returnVec = BilinearInterpolation(x1, x2, y1, y2, dataPoint.x, dataPoint.y, reader);
+	
 	return true;
 }
 vecData Integrations::interpolateVectorData(int x1, int x2, int y1, int y2, int x, int y,
@@ -128,16 +129,17 @@ float calcComponent(float q11, float q12, float q21, float q22, float x1, float 
 	    return comp;
 }
 
-vecData Integrations::BilinearInterpolation(float x1, float x2, float y1, float y2, float x, float y, ReadData &reader)
-{
+vecData Integrations::BilinearInterpolation(float x1, float x2, float y1, float y2, float x, float y, ReadData &reader){
 	vecData result;
 	float xComp = 0;
 	float yComp = 0;
-		vecData Q11 = reader.getVector(x1, y1);
-		vecData Q12 = reader.getVector(x1, y2);
-		vecData Q21 = reader.getVector(x2, y1);
-		vecData Q22 = reader.getVector(x2, y2);
-	    xComp = calcComponent(Q11.x, Q12.x, Q21.x, Q22.x, x1, x2, y1, y2, x, y);
-	    yComp = calcComponent(Q11.y, Q12.y, Q21.y, Q22.y, x1, x2, y1, y2, x, y);
-	    return vecData(xComp, yComp);
+	vecData Q11 = reader.getVector(x1, y1);
+	vecData Q12 = reader.getVector(x1, y2);
+	vecData Q21 = reader.getVector(x2, y1);
+	vecData Q22 = reader.getVector(x2, y2);
+	
+	
+	xComp = calcComponent(Q11.x, Q12.x, Q21.x, Q22.x, x1, x2, y1, y2, x, y);
+	yComp = calcComponent(Q11.y, Q12.y, Q21.y, Q22.y, x1, x2, y1, y2, x, y);
+	return vecData(xComp, yComp);
 }

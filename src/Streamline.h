@@ -36,7 +36,7 @@ class Streamline{
 		WMpoint startPoint;
 		vector<WMpoint> curveForwardPoints;
 		vector<WMpoint> curveBackwardPoints;
-		vector<WMpoint> allCurvePointss;
+		vector<WMpoint> allCurvePoints;
 		
 		void calcCurve();
 };

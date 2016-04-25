@@ -36,7 +36,7 @@ vector<WMpoint> Streamline::getCurveBackwardPoints(){
 	return curveBackwardPoints;
 }
 vector<WMpoint> Streamline::getCurvePoints(){
-	return allCurvePointss;
+	return allCurvePoints;
 }
 
 int Streamline::getLength(){
@@ -67,6 +67,7 @@ void Streamline::calcCurve(){
 		}
 		
 		if((increment.x == tempIncr.x && increment.y == tempIncr.y)	||
+		   (increment.x >= reader.getWidth() || increment.y >= reader.getHeight())	||
 		   (increment.x < 0 || increment.y < 0)){
 			curveForwardPoints.resize(i);
 			break;//End point, do not store more of, or continue this direction
@@ -87,6 +88,7 @@ void Streamline::calcCurve(){
 			}
 			
 			if((increment.x == tempIncr.x && increment.y == tempIncr.y)	||
+			   (increment.x >= reader.getWidth() || increment.y >= reader.getHeight())	||
 			   (increment.x < 0 || increment.y < 0)){
 				curveForwardPoints.resize(i);
 				break;//End point, do not store more of, or continue this direction
@@ -94,20 +96,14 @@ void Streamline::calcCurve(){
 			curveBackwardPoints[i] = WMpoint(increment.x, increment.y);
 		}
 	}
-
-	fprintf(stderr, "Before: %d, after: %d\n", curveBackwardPoints.size(), curveForwardPoints.size());
-	//fprintf(stderr, "Before backwards print:\n");
+	
 	if(biDirectional){
 		for (int i = curveBackwardPoints.size()-1; i >= 0; --i) {
-			//fprintf(stderr, "Point %d: %f, %f\n", i, curveBackwardPoints[i].x, curveBackwardPoints[i].y);
-			allCurvePointss.push_back(curveBackwardPoints[i]);
+			allCurvePoints.push_back(curveBackwardPoints[i]);
 		}
 	}
-	//fprintf(stderr, "Before forward print:\n");
+	allCurvePoints.push_back(startPoint);
 	for (int i = 0; i < curveForwardPoints.size(); ++i) {
-		//fprintf(stderr, "Point %d: %f, %f\n", i, curveForwardPoints[i].x, curveForwardPoints[i].y);
-		//fprintf(stderr, "Point size: %d/%d\n", i, curveForwardPoints.size());
-		allCurvePointss.push_back(WMpoint(curveForwardPoints[i].x, curveForwardPoints[i].y));
+		allCurvePoints.push_back(WMpoint(curveForwardPoints[i].x, curveForwardPoints[i].y));
 	}
-fprintf(stderr, "Total: %d\n", allCurvePointss.size());
 }
