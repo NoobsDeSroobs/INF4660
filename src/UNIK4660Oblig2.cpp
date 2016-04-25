@@ -246,28 +246,19 @@ void createNoiseImage(int width, int height){
 	}
 	 * */
 }
-//Creates the weight function as a look up table
-float* createWeightLUT(int size){
-	float *lut;
-	for(int i = 0; i < size; i++){
-		lut[i] = i;
-	}
-	
-	return lut;
-}
 //Returns the intensity of the pixel that is being convoluted
-float convolutionStartPoint(Streamline &stream, float* weightLUT, 
+float convolutionStartPoint(Streamline &stream, float weightLUT, 
 						   vector<vector<int> > &contributors, 
-						   vector<vector<float> > &noiseTexture,
+						   vector<vector<float> > const &noiseTexture,
 						   vector<vector<float> > &outputImage){
 	
 	float weightAccumulator = 0.0;
 	float texAccumulator = 0.0;
-	
+	float pointWeight = 1; //weightLUT[] //Ignore weight for now, just use average, 
+											 //is this the same as a constant filter kernel
+											 //which fast lic needs?
 	//Build accumulators
 	for(auto &p : stream.getCurvePoints()){
-		float pointWeight = 1; //weightLUT[] //Ignore weight for now, just use average, 
-											 //is this the same as a constant filter kernel
 		weightAccumulator += pointWeight; 
 		texAccumulator += noiseTexture[p.x][p.y] * pointWeight;
 	}
@@ -275,56 +266,65 @@ float convolutionStartPoint(Streamline &stream, float* weightLUT,
 	//Set intensity
 	point p = stream.getStartPoint();
 	float intensity = texAccumulator / weightAccumulator;
-	outputImage[p.x][p.y] = intensity;
+	outputImage[p.x][p.y] += intensity;
 	contributors[p.x][p.y]++;
 	
 	return intensity;
 }
-void convolutionForwards(float startI, Streamline stream, float* weightLUT,
-						 vector<vector<int> > &contributors, 
-						 vector<vector<float> > &noiseTexture,
-						 vector<vector<float> > &outputImage){
-	
+void convolutionFwdAndBwd(float startI, Streamline stream, float weightLUT,
+						  vector<vector<int> > &contributors, 
+						  vector<vector<float> > const &noiseTexture,
+						  vector<vector<float> > &outputImage){
 	float prevI = startI;
+	float pointWeight = 1.0; //Just a simple box function for now.
+	point streamStart = stream.getStartPoint();
+	vector<point> streamForward = stream.getCurveForwardPoints();
+	vector<point> streamBackwards = stream.getCurveBackwardPoints();
+	point p, prevPoint, pLeapFwdN, pLeapBwdN;
 	
-	//Build accumulators
-	for(int i = 0; i < stream.getCurveForwardPoints().size(); i++){
-		point p = stream.getCurveForwardPoints()[i];
+	//Find max M, half of shortest length
+	minLength = (streamForward.size() < streamBackwards.size()) 
+					? streamForward.size() : streamBackwards.size();
+	int M = minLength / 2;
+	int n = M;
+	
+	//Forwards
+	prevPoint = streamStart;
+	for(int m = 0; m < M; m++){
+		p = streamForward[m];
+		pLeapFwdN = streamForward[m+n];
+		pLeapBwdN = (n-1 > m) ? streamBackwards[n-1 - m] : streamStart;
 		
-		float weight = 1;
-		float texAccumulator = 0.0;
+		//I(Xm+1) = I(Xm) + k*( T(Xm+1+n) - T(Xm-n) )
+		float intensity = prevI + pointWeight * (noiseTexture[pLeapFwdN.x][pLeapFwdN.y] - 
+												 noiseTexture[pLeapBwdN.x][pLeapBwdN.y]);
 		
-		float intensity = prevI + weight*(noiseTexture[i][i] - noiseTexture[i][i]);
-		//1 can be replaced by the 
-		
+		outputImage[p.x][p.y] += intensity;
+		contributors[p.x][p.y]++; //Should expect this is needed?
 		
 		prevI = intensity;
+		prevPoint = streamForward[m];
 	}
 	
-	//Set intensity
-	point p = stream.getStartPoint();
-	//outputImage[p.x][p.y] = texAccumulator / weightAccumulator;
-	contributors[p.x][p.y]++;
-	
-	
-	
-	
-	
-
-	float weightAccumulator = 0.0;
-	float texAccumulator = 0.0;
-	
-	outputImage[p.x][p.y] = startI + (texAccumulator / weightAccumulator);
-}
-void convolutionBackwards(float startI, Streamline stream, float* weightLUT,
-						  vector<vector<int> > &contributors, 
-						  vector<vector<float> > &noiseTexture,
-						  vector<vector<float> > &outputImage){
-	for(auto &p : stream.getCurvePoints()){
+	//Backwards
+	prevPoint = streamStart;
+	prevI = startI;
+	for(int m = 0; m < M; m++){
+		p = streamBackwards[m];
+		pLeapBwdN = streamBackwards[m+n];
+		pLeapFwdN = (n-1 > m) ? streamForward[n-1 - m] : streamStart;
 		
+		//I(Xm-1) = I(Xm) + k*( T(Xm-1-n) - T(Xm+n) )
+		float intensity = prevI + pointWeight * (noiseTexture[pLeapBwdN.x][pLeapBwdN.y] - 
+												 noiseTexture[pLeapFwdN.x][pLeapFwdN.y]);
+		
+		outputImage[p.x][p.y] += intensity;
+		contributors[p.x][p.y]++; //Should expect this is needed?
+		
+		prevI = intensity;
+		prevPoint = streamBackwards[m];
 	}
 }
-
 //Loop for LIC
 void doLICLoop(int dataset, int squareRes, int weightSize){
 	//Read the vector data
@@ -347,8 +347,7 @@ void doLICLoop(int dataset, int squareRes, int weightSize){
 	bool bidirectional = true;
 	
 	//Create weight/kernel function
-	float *weightLUT;
-	weightLUT = createWeightLUT(streamLength * 2);
+	float weightLUT = 1; //We only use a simple box filter for now
 	
 	//Fast LIC counter
 	int maxContributors = 10;
@@ -363,16 +362,20 @@ void doLICLoop(int dataset, int squareRes, int weightSize){
 			
 			//Find streamline for current point
 			Streamline stream(x, y, streamLength, bidirectional, stepSize, EULER, reader);
+			if(stream.isCriticalPoint()) continue;
 			
 			//Fast LIC, convolves both for current, backwards and forwards
-			float intensity = 
-				convolutionStartPoint(stream, weightLUT, contributors, noiseTexture, outputImage);
-			convolutionForwards(intensity, stream, weightLUT, 
-								contributors, noiseTexture, outputImage);
-			convolutionBackwards(intensity, stream, weightLUT, 
-								 contributors, noiseTexture, outputImage);
+			//First start point of the streamline, uses the entire streamline
+			float intensity = convolutionStartPoint(stream, weightLUT, contributors, 
+				noiseTexture, outputImage);
+			
+			//Then forwards and backwards, only halfway up and down
+			convolutionFwdAndBwd(intensity, stream, weightLUT, contributors, noiseTexture, 
+				outputImage);
+			}
 		}
-	}
+	
+	//Normalize the value
 	for(int x = 1; x <= squareRes; x++){
 		for(int y = 1; y <= squareRes; y++){
 			outputImage[x][y] /= contributors[x][y];
