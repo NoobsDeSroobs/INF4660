@@ -82,7 +82,7 @@ bool Integrations::findVectorDataForPoint(WMpoint dataPoint, vecData &returnVec,
 		return false;
 	}
 	
-	
+
 	returnVec = BilinearInterpolation(x1, x2, y1, y2, dataPoint.x, dataPoint.y, reader);
 	return true;
 }

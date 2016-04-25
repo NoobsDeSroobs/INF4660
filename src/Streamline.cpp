@@ -66,7 +66,9 @@ void Streamline::calcCurve(){
 			increment = Integrations::RungeKutta(increment, reader, stepSize);
 		}
 		
-		if(increment.x == tempIncr.x && increment.y == tempIncr.y){
+		if((increment.x == tempIncr.x && increment.y == tempIncr.y)	||
+		   (increment.x < 0 || increment.y < 0)){
+			curveForwardPoints.resize(i-1);
 			break;//End point, do not store more of, or continue this direction
 		}
 
@@ -84,8 +86,9 @@ void Streamline::calcCurve(){
 				increment = Integrations::RungeKutta(increment, reader, -stepSize);
 			}
 			
-			
-			if(increment.x == tempIncr.x && increment.y == tempIncr.y){
+			if((increment.x == tempIncr.x && increment.y == tempIncr.y)	||
+			   (increment.x < 0 || increment.y < 0)){
+				curveForwardPoints.resize(i-1);
 				break;//End point, do not store more of, or continue this direction
 			}
 			curveBackwardPoints[i] = WMpoint(increment.x, increment.y);
