@@ -17,6 +17,7 @@
 #include <cmath>
 #include <queue>
 #include <vector>
+#include <unistd.h>
 using namespace std;
 
 
@@ -34,15 +35,30 @@ void drawLic(ReadData &data, SDLRenderer& renderer);
 //SDL_Texture createNoiseTexture(int width, int height);
 float* createWeightLUT(int size);
 float convolution(point pixelPoint);
-void doLICLoop();
+void doLICLoop(int dataset, int squareRes, int weightSize);
+
+void calculateRandomStreamLine(ReadData &data, SDLRenderer &renderer){
+	Streamline stream(270, 270, 6, true, 6.0f,
+			   EULER, data);
+	float dataToPixelCoord = renderer.SCREEN_HEIGHT/data.getHeight();
+
+	vector<point> &curve = stream.getCurvePoints();
+	for (uint var = 0; var < curve.size(); ++var) {
+		curve[var].x = curve[var].x*dataToPixelCoord;
+		curve[var].y = curve[var].y*dataToPixelCoord;
+		fprintf(stderr, "CurvePoint %d: <%f, %f>\n", var, (float)curve[var].x, (float)curve[var].y);
+	}
+	renderer.drawLine(curve);
+
+}
 
 
 //This system is LITTLE ENDIAN!!!!
 int main() {
-	SDLRenderer renderer(500, 500);
+	SDLRenderer renderer(1000, 1000);
 	renderer.setupSDLWindow();
-	SDLRenderer noiseImageRenderer(renderer.SCREEN_WIDTH, renderer.SCREEN_HEIGHT);
-	noiseImageRenderer.setupSDLWindow("Noise Image", true);
+	//SDLRenderer noiseImageRenderer(renderer.SCREEN_WIDTH, renderer.SCREEN_HEIGHT);
+	//noiseImageRenderer.setupSDLWindow("Noise Image", true);
 	renderer.SetTexture("/home/noobsdesroobs/Downloads/arrow.bmp");
 	//Test(renderer);
 
@@ -67,39 +83,41 @@ int main() {
 	    	}
 
 	    	/* If a quit event has been sent */
-	    	if(event.type == SDL_RELEASED){
-	    		continue;
+	    	if(event.type == SDL_KEYDOWN){
+				switch( event.key.keysym.sym ){
+				  case SDLK_DOWN:
+					printf( "Move time forward.\n" );
+					calculateRandomStreamLine(isabellData, renderer);
+					//drawStreamLines(isabellData, noiseImageRenderer);
+					//noiseImageRenderer.renderToScreen();
+
+					break;
+
+				  case SDLK_UP:
+					printf( "Move time backwards.\n" );
+					break;
+
+				  case SDLK_ESCAPE:
+					/* Quit the application */
+					RUNNING = false;
+					break;
+				  case SDLK_r:
+					  drawAllArrows(isabellData, renderer);
+					  break;
+
+				  case SDLK_d:
+						renderer.renderToScreen();
+						break;
+				  default:
+
+					break;
+				 }
 	    	}
-	    	switch( event.key.keysym.sym ){
-			  case SDLK_DOWN:
-				printf( "Move time forward.\n" );
-				drawLic(isabellData, noiseImageRenderer);
-				noiseImageRenderer.renderToScreen();
-
-				break;
-
-			  case SDLK_UP:
-				printf( "Move time backwards.\n" );
-				break;
-
-			  case SDLK_ESCAPE:
-				/* Quit the application */
-				RUNNING = false;
-				break;
-			  case SDLK_r:
-				  drawAllArrows(isabellData, renderer);
-				  break;
-
-			  default:
-
-				break;
-	    	 }
-
 	    }
 	}
 	fprintf(stderr, "Finished with the program.");
 	renderer.killSDL();
-	noiseImageRenderer.killSDL();
+	//noiseImageRenderer.killSDL();
 	return 0;
 }
 
@@ -135,7 +153,6 @@ void drawAllArrows(ReadData &data, SDLRenderer& renderer){
 			}
 		}
 	}
-	renderer.renderToScreen();
 	SDL_SaveBMP(renderer.getMainSurface(), "Isabel.bmp");
 }
 
@@ -215,6 +232,15 @@ void drawStreamLines(ReadData &data, SDLRenderer& renderer){
 
 }
 
+void diplayIMGArray(vector<vector<float>> &img){
+	SDLRenderer renderer(img.size(), img[0].size());
+	renderer.setupSDLWindow("Noise", true);
+	renderer.setSurface(img);
+	renderer.renderToScreen();
+	usleep(3000000);
+	renderer.killSDL();
+}
+
 void drawLic(ReadData &data, SDLRenderer& noiseImageRenderer){
 
 	int grey = rand();
@@ -230,31 +256,27 @@ void drawLic(ReadData &data, SDLRenderer& noiseImageRenderer){
 }
 
 //Creates the input noise image texture
-void createNoiseImage(int width, int height){
-	/*
-	SDL_Renderer noiseTexture(widt, height);
-	int grey;
+void createNoiseTexture(int width, int height, vector<vector<float>> &img){
+	Uint32 grey;
 	
-	for (int i = 0; i < width; i++) {
+	for (int i = 0; i < height; i++) {
 		for (int j = 0; j < width; j++) {
 			grey = rand();
 			
 			//No idea what is correct here!
-			noiseTexture.PutPixel32_nolock(noiseTexture.getMainSurface(), x, y,
-					noiseTexture.RGBA2INT(grey, grey, grey, grey));
+			img[i][j] = grey;
 		}
 	}
-	 * */
 }
 //Creates the weight function as a look up table
-float* createWeightLUT(int size){
-	float *lut;
-	for(int i = 0; i < size; i++){
-		lut[i] = i;
-	}
-	
-	return lut;
-}
+//float* createWeightLUT(int size){
+//	float *lut;
+//	for(int i = 0; i < size; i++){
+//		lut[i] = i;
+//	}
+//
+//	return lut;
+//}
 //Returns the intensity of the pixel that is being convoluted
 float convolutionStartPoint(Streamline &stream, float* weightLUT, 
 						   vector<vector<int> > &contributors, 
@@ -288,11 +310,11 @@ void convolutionForwards(float startI, Streamline stream, float* weightLUT,
 	float prevI = startI;
 	
 	//Build accumulators
-	for(int i = 0; i < stream.getCurveForwardPoints().size(); i++){
-		point p = stream.getCurveForwardPoints()[i];
+	for(uint i = 0; i < stream.getCurveForwardPoints().size(); i++){
+		//point p = stream.getCurveForwardPoints()[i];
 		
 		float weight = 1;
-		float texAccumulator = 0.0;
+		//float texAccumulator = 0.0;
 		
 		float intensity = prevI + weight*(noiseTexture[i][i] - noiseTexture[i][i]);
 		//1 can be replaced by the 
@@ -320,26 +342,28 @@ void convolutionBackwards(float startI, Streamline stream, float* weightLUT,
 						  vector<vector<int> > &contributors, 
 						  vector<vector<float> > &noiseTexture,
 						  vector<vector<float> > &outputImage){
-	for(auto &p : stream.getCurvePoints()){
-		
-	}
+//	for(auto &p : stream.getCurvePoints()){
+//
+//	}
 }
 
 //Loop for LIC
 void doLICLoop(int dataset, int squareRes, int weightSize){
 	//Read the vector data
 	ReadData reader;
-	string isabelPath = "/home/noobsdesroobs/Downloads/isabel_2d.h5";
-	string metsimPath = "/home/noobsdesroobs/Downloads/metsim1_2d.h5";
-	string vectorFieldFile = (dataset == 0) ? isabelPath : metsimPath;
-	bool transpose = (dataset == 0) ? true : false;
-	reader.readFromFile(vectorFieldFile, transpose);
-	
-	//Create noise and output image -TODO
-		//createNoiseTexture(squareResolution, squareResolution);
-	//outputImage = SDL_Texture(size, size); = 0 for all x,y
+	//string isabelPath = "/home/noobsdesroobs/Downloads/isabel_2d.h5";
+	//string metsimPath = "/home/noobsdesroobs/Downloads/metsim1_2d.h5";
+	//string vectorFieldFile = (dataset == 0) ? isabelPath : metsimPath;
+	//bool transpose = (dataset == 0) ? true : false;
+	//reader.readFromFile(vectorFieldFile, transpose);
+
 	vector<vector<float> > noiseTexture(squareRes, vector<float>(squareRes, 0));
 	vector<vector<float> > outputImage(squareRes, vector<float>(squareRes, 0));
+	//Create noise and output image -TODO
+		createNoiseTexture(squareRes, squareRes, noiseTexture);
+		diplayIMGArray(noiseTexture);
+		return;
+	//outputImage = SDL_Texture(size, size); = 0 for all x,y
 	
 	//Variables
 	int streamLength = squareRes * 0.20;
@@ -348,7 +372,7 @@ void doLICLoop(int dataset, int squareRes, int weightSize){
 	
 	//Create weight/kernel function
 	float *weightLUT;
-	weightLUT = createWeightLUT(streamLength * 2);
+	//weightLUT = createWeightLUT(streamLength * 2);
 	
 	//Fast LIC counter
 	int maxContributors = 10;

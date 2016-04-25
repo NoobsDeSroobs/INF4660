@@ -69,13 +69,8 @@ void SDLRenderer::killSDL(){
 }
 
 int SDLRenderer::renderImgAtPos(int x, int y, int imgX, int imgY, int width, int height, double angle){
-	SDL_Rect SrcR;
+
 	SDL_Rect DestR;
-	SDL_Point originOfRot;
-	SrcR.x = imgX;
-	SrcR.y = imgY;
-	SrcR.w = width;
-	SrcR.h = height;
 	DestR.x = x;
 	DestR.y = y;
 	DestR.w = width;
@@ -119,7 +114,7 @@ void SDLRenderer::SetTexture(std::string path){
 void SDLRenderer::drawLine(std::vector<point> &curve){
 	SDL_Point points[curve.size()];
 
-	for (int i = 0; i < curve.size(); ++i) {
+	for (uint i = 0; i < curve.size(); ++i) {
 		points[i].x = curve[i].x;
 		points[i].y = curve[i].y;
 	}

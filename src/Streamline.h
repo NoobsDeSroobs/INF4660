@@ -20,7 +20,7 @@ class Streamline{
 		point getStartPoint();
 		vector<point> getCurveForwardPoints();
 		vector<point> getCurveBackwardPoints();
-		vector<point> getCurvePoints();		
+		vector<point> &getCurvePoints();
 		
 		bool isBiDirectional();
 		

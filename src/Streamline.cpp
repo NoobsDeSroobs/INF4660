@@ -27,7 +27,7 @@ vector<point> Streamline::getCurveForwardPoints(){
 vector<point> Streamline::getCurveBackwardPoints(){
 	return curveBackwardPoints;
 }
-vector<point> Streamline::getCurvePoints(){
+vector<point> &Streamline::getCurvePoints(){
 	return allCurvePoints;
 }
 
@@ -43,11 +43,10 @@ void Streamline::calcCurve(){
 	curveBackwardPoints.resize(length-1, point());
 	
 	incBackward = incForward = startPoint;
-	for(int i = 0; i < length; i++){
+	for(uint i = 0; i < length; i++){
 		if(integration == EULER){
 			incForward = Integrations::ForwardEuler(incForward, reader, stepSize);
-		}
-		else{
+		}else{
 			incForward = Integrations::RungeKutta(incForward, reader, stepSize);
 		}
 		curveForwardPoints[i] = point(incForward.x, incForward.y);
@@ -63,7 +62,15 @@ void Streamline::calcCurve(){
 		}
 	}
 	
-	//allCurvePoints(curveBackwardPoints.begin(), curveBackwardPoints.end());
-	//curvePoints.insert(curvePoints.end(),startPoint);
-	//curvePoints.insert(curvePoints.end(), curveForwardPoints.begin(), curveForwardPoints.end() )
+
+	fprintf(stderr, "Before backwards print:\n");
+	for (int i = curveBackwardPoints.size()-1; i >= 0; --i) {
+		fprintf(stderr, "Point %d: %f, %f\n", i, curveBackwardPoints[i].x, curveBackwardPoints[i].y);
+		allCurvePoints.push_back(curveBackwardPoints[i]);
+	}
+	fprintf(stderr, "Before forward print:\n");
+	for (int i = 0; i < curveForwardPoints.size(); ++i) {
+		fprintf(stderr, "Point %d: %f, %f\n", i, curveForwardPoints[i].x, curveForwardPoints[i].y);
+		allCurvePoints.push_back(curveForwardPoints[i]);
+	}
 }
