@@ -22,7 +22,6 @@ using namespace std;
 
 void drawAllArrows(ReadData &data, SDLRenderer& renderer);
 void drawStreamLines(ReadData &data, SDLRenderer& renderer);
-void drawLic(ReadData &data, SDLRenderer& renderer);
 float convolutionStartPoint(Streamline &stream, float weightLUT, 
 			vector<vector<int> > &contributors, vector<vector<float> > const &noiseTexture,
 			vector<vector<float> > &outputImage);
@@ -31,14 +30,18 @@ void convolutionFwdAndBwd(float startI, Streamline stream, float weightLUT,
 			vector<vector<float> > &outputImage);
 void doLICLoop(ReadData &dataset, SDLRenderer &renderer);
 
+const static string imgFileName = "M10x10RK50S.bmp";
+
 void calculateRandomStreamLine(ReadData &data, SDLRenderer &renderer){
 	int length = 50;
-	int stride = 500/8;
+	
+	//282, 382
+	
+	int stride = data.getHeight()/10;
 	float dataToPixelCoord = renderer.SCREEN_HEIGHT/data.getHeight();
-	for (int y = 50; y < 500; y = y + stride) {
-		for (int x = 50; x < 500; x = x + stride) {
-			Streamline stream(x, y, length, true, 0.25, EULER, data);
-			
+	for (int y = 0; y < data.getHeight(); y = y + stride) {
+		for (int x = 0; x < data.getHeight(); x = x + stride) {
+			Streamline stream(x, y, length, false, 0.25, RK, data);
 			vector<WMpoint> curve = stream.getCurvePoints();
 			fprintf(stderr, "Seed x: %d, y: %d\n", x, y);
 			if(curve.size() > 10 && !stream.isCriticalPoint()){
@@ -95,13 +98,14 @@ int main() {
 						/* Quit the application */
 						RUNNING = false;
 						break;
+						
 					case SDLK_r:
-					drawAllArrows(isabellData, renderer);
-					break;
+						drawAllArrows(isabellData, renderer);
+						break;
 					
 					case SDLK_d:
 						renderer.renderToScreen();
-						SDL_SaveBMP(renderer.getMainSurface(), "Isabel.bmp");
+						SDL_SaveBMP(renderer.getMainSurface(), imgFileName.c_str());
 						break;
 					
 					case SDLK_c:
@@ -122,25 +126,24 @@ int main() {
 					
 					break;
 				 }
-	    	}
-	    }
+			}
+		}
 	}
 	fprintf(stderr, "Finished with the program.");
 	renderer.killSDL();
-	//noiseImageRenderer.killSDL();
 	return 0;
 }
 
 void drawAllArrows(ReadData &data, SDLRenderer& renderer){
-	float xPixelStep = renderer.SCREEN_WIDTH/(float)data.getWidth();
-	float yPixelStep = renderer.SCREEN_HEIGHT/(float)data.getHeight();
+	float xPixelStep = 5;//renderer.SCREEN_WIDTH/(float)data.getWidth();
+	float yPixelStep = 5;//renderer.SCREEN_HEIGHT/(float)data.getHeight();
 	velVector baseVec(1.0f, 0.0f);
 	renderer.clear();
 	int ctr = 1;
 	float rad2deg = 180/M_PI;
 	//For each point. point.render()
-	for(unsigned int i = 0; i < data.getHeight(); i = i + 10){
-		for(unsigned int k = 0; k < data.getWidth(); k = k + 10){
+	for(unsigned int i = 0; i < data.getHeight(); i = i + 5){
+		for(unsigned int k = 0; k < data.getWidth(); k = k + 5){
 			ctr++;
 			velVector currentVec = data.getVector(k, i);
 			float vecLen = currentVec.length();
@@ -238,29 +241,6 @@ void drawStreamLines(ReadData &data, SDLRenderer& renderer){
 			renderer.drawLine(curve);
 		}
 	}
-
-}
-
-void diplayIMGArray(vector<vector<float>> &img){
-	SDLRenderer renderer(img.size(), img[0].size());
-	renderer.setupSDLWindow("Noise", true);
-	renderer.setSurface(img);
-	renderer.renderToScreen();
-	usleep(3000000);
-	renderer.killSDL();
-}
-
-void drawLic(ReadData &data, SDLRenderer& noiseImageRenderer){
-
-	int grey = rand();
-	for (int y = 0; y < noiseImageRenderer.SCREEN_HEIGHT; ++y) {
-		for (int x = 0; x < noiseImageRenderer.SCREEN_WIDTH; ++x) {
-			noiseImageRenderer.PutPixel32_nolock(noiseImageRenderer.getMainSurface(), x, y,
-					noiseImageRenderer.RGBA2INT(grey, grey, grey, grey));
-			grey = rand();
-		}
-	}
-
 
 }
 
