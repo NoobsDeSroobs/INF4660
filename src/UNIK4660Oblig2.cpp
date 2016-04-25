@@ -283,7 +283,7 @@ void convolutionFwdAndBwd(float startI, Streamline stream, float weightLUT,
 	point p, prevPoint, pLeapFwdN, pLeapBwdN;
 	
 	//Find max M, half of shortest length
-	minLength = (streamForward.size() < streamBackwards.size()) 
+	int minLength = (streamForward.size() < streamBackwards.size()) 
 					? streamForward.size() : streamBackwards.size();
 	int M = minLength / 2;
 	int n = M;

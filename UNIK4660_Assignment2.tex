@@ -54,6 +54,9 @@ In this assignment we are first to visualize two sets of vector fields by their 
 We are also to implement and compare different integration methods, specifically Forward Euler and Fourth Order Runge-Kutta, and use differently sized convolution kernels. The results are shown and discussed at the end of this report.
 
 \section{Field Line Visualization}
+Visualization of field lines are very dependent on the points, called seed points, from which the streamlines are calculated. Passing over the vector field and using everything for streamline will simply give a chaotic and unusable image. Seed point strategies are therefore employed to find the best start point for each streamline. 
+\\
+We have chosen to test evenly spaced seed points, as well as the "equal distance" seed point strategy.
 
 \section{Line Integral Convolution}
 LIC is a visualization technique used to show the motion and flow in fluids. Using a simple gray-scale noise image it generates a texture by taking every pixel in the image and running it through a convolution kernel. The intended effect is lines that follow the vector field, and gives good, intuitive understanding of the flow direction. The lines are kept distinct by the varying gray scales, though they can be given different colors to help show additional system information, such as the vector magnitude.
@@ -64,31 +67,49 @@ Given a field line $\sigma$, the operation can be described by
 \end{align*}
 Where $I(x_0)$ is the intensity of a pixel at $x_0 = \sigma(s_0)$. $k$ is the convolution kernel with length $2L$, and $s$ is the arc-length.
 
+\subsection{Fast LIC}
+Our LIC implementation uses the the "Fast LIC" algorithm presented in the lecture. With a constant box function as the filter kernel, the integration of the streamline origin is: \\
+\begin{align*}
+	I(x_0) = k \int^{n}_{i = -n}T(x_i)
+\end{align*}
+This allows the convolution of the streamline in both directions as we pass over the input image by the simple function below:
+\begin{align*}
+	I(x_{m+1}) &= I(x_m) + k[T(x_{m+1+n}) - T(x_{m-n})], m = 0, 1,..., M	\\
+	I(x_{m-1}) &= I(x_m) + k[T(x_{m-1-n}) - T(x_{m+n})], m = 0, 1,..., M
+\end{align*}
+This should help speed up the execution. However, as we did not implement normal LIC, we do not have anything to compare it to.
+
 \section{Implementation}
-
-Straight box weight function
-
+For our implementation, both for the Field Line Integration and LIC, we have chosen to use Simple DirectMedia Layer(SDL) library for the graphical representation. The library have allowed us to quickly see the effect of any changes we have done in the code.
+\\
+During the integration, handling of critical points is done by simply ignoring the point if it is used as the origin. Interpolation uses it as any other vector in the field.
+Should the integration try to pass beyond the boundaries of the vector field, we stop the integration in that direction. In the LIC implementation this has the effect of cutting short the convolution in both directions.
 
 \subsection{Forward Euler}
-
+The forward Euler integration scheme is the simplest of the two schemes. 
 \begin{align*}
-	\psi_{n+1} =& (x_{n+1}, y_{n+1}) = (x_n, y_n) + hf(x_n, y_n)
+	\psi_{n+1} =& \psi_n + hf(x_n, y_n)
 \end{align*}
-f() is the vector field
+With $\psi_n$ as the current coordinates for the output image, $h$ as the step size and $f$ as the vector field function.
 
 \subsection{Fourth Order Runge-Kutta}
+Runge-Kutta is a bit more complicated, and where Euler takes the step in one go, RK divides it into four parts.
 \begin{align*}
-	\dot{\psi} =& f(t,\psi), & \psi(t_0) = \psi_0, & t = (x_n, y_n)
-\end{align*}
-\begin{align*}
-	k_1 =& f(t_n, \psi_n)	\\
-	k_2 =& f(t_n + \frac{h}{2}, \psi_n + \frac{h}{2}k_1)	\\
-	k_3 =& f(t_n + \frac{h}{2}, \psi_n + \frac{h}{2}k_2)	\\
-	k_4 =& f(t_n + h, \psi_n + hk_3)	\\	
-	\psi_{n+1} =& \psi_n + \frac{h}{6}(k_1 + 2k_2 + 2k_3 + k_4)
+	k_1 =& f(x_n, y_n)h	\\
+	k_2 =& f(x_n + \frac{k_1}{2}, y_n + \frac{k_1}{2})	\\
+	k_3 =& f(x_n + \frac{k_2}{2}, y_n + \frac{k_2}{2})	\\
+	k_4 =& f(x_n + k_3, y_n + k_3	\\	
+	\psi_{n+1} =& \psi_n + \frac{k_1}{6} + \frac{k_2}{3} + \frac{k_3}{3} + \frac{k_4}{6}
 \end{align*}
 
+
 \section{Results}
+
+Step size
+streamline/filter-core length
+Euler vs RungeKutta
+
+
 \subsection{Forward Euler: FilterVariations}
 
 %\includegraphics[scale=1.0]{PathFileName}
