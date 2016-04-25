@@ -111,13 +111,17 @@ void SDLRenderer::SetTexture(std::string path){
 
 }
 
-void SDLRenderer::drawLine(std::vector<point> &curve){
+void SDLRenderer::drawLine(std::vector<WMpoint> &curve){
 	SDL_Point points[curve.size()];
-
 	for (uint i = 0; i < curve.size(); ++i) {
-		points[i].x = curve[i].x;
-		points[i].y = curve[i].y;
+		points[i].x = (int)curve[i].x;
+		points[i].y = (int)curve[i].y;
+	}
+	for (int i = 0; i < curve.size()-1; ++i) {
+		if(points[i].x > 0 && points[i].y > 0 && points[i].x < SCREEN_WIDTH && points[i].y < SCREEN_HEIGHT && points[i+1].x > 0 && points[i+1].y > 0 && points[i+1].x < SCREEN_WIDTH && points[i+1].y < SCREEN_HEIGHT){
+			//fprintf(stderr, "DrawLineasdfasdf %d, %d\n", points[i].x, points[i].y);
+			SDL_RenderDrawLine(Main_Renderer, points[i].x, points[i].y, points[i+1].x, points[i+1].y );
+		}
 	}
 
-	SDL_RenderDrawLines(Main_Renderer, points, curve.size());
 }

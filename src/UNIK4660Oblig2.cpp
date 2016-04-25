@@ -34,22 +34,25 @@ void drawLic(ReadData &data, SDLRenderer& renderer);
 //New methods, must be merged with the others
 //SDL_Texture createNoiseTexture(int width, int height);
 float* createWeightLUT(int size);
-float convolution(point pixelPoint);
+float convolution(WMpoint pixelPoint);
 void doLICLoop(int dataset, int squareRes, int weightSize);
 
 void calculateRandomStreamLine(ReadData &data, SDLRenderer &renderer){
-	Streamline stream(270, 270, 6, true, 6.0f,
+	int length = 50;
+
+//282, 382,
+	Streamline stream(400, 250, length, true, 5,
 			   EULER, data);
 	float dataToPixelCoord = renderer.SCREEN_HEIGHT/data.getHeight();
 
-	vector<point> &curve = stream.getCurvePoints();
+	vector<WMpoint> curve = stream.getCurvePoints();
+	fprintf(stderr, "main");
 	for (uint var = 0; var < curve.size(); ++var) {
+		//fprintf(stderr, "CurvePoint %d: <%f, %f>\n", var, curve[var].x, curve[var].y);
 		curve[var].x = curve[var].x*dataToPixelCoord;
 		curve[var].y = curve[var].y*dataToPixelCoord;
-		fprintf(stderr, "CurvePoint %d: <%f, %f>\n", var, (float)curve[var].x, (float)curve[var].y);
 	}
 	renderer.drawLine(curve);
-
 }
 
 
@@ -156,9 +159,9 @@ void drawAllArrows(ReadData &data, SDLRenderer& renderer){
 	SDL_SaveBMP(renderer.getMainSurface(), "Isabel.bmp");
 }
 
-bool isIsolated(point seed, float d, Streamline &csl){
+bool isIsolated(WMpoint seed, float d, Streamline &csl){
 
-		std::vector<point> SLPoints = csl.getCurvePoints();
+		std::vector<WMpoint> SLPoints = csl.getCurvePoints();
 		for (uint k = 0; k < SLPoints.size(); ++k) {
 			if(seed.distanceTo(SLPoints[k]) < d){
 				return false;
@@ -173,18 +176,18 @@ void drawStreamLines(ReadData &data, SDLRenderer& renderer){
 	float d = 1;
 	int stride = 10;
 	int length = 6;
-	std::queue<point> seedCandidates;
+	std::queue<WMpoint> seedCandidates;
 	std::vector<Streamline> finishedSLs;
 	std::queue<Streamline> SLQueue;
 
 	//Build candidates
 	for (uint y = 0; y < data.getHeight(); y = y + stride) {
 		for (uint x = 0; x < data.getWidth(); x = x + stride) {
-			seedCandidates.push(point(x, y));
+			seedCandidates.push(WMpoint(x, y));
 		}
 	}
 
-	point candidateSeed = seedCandidates.front();
+	WMpoint candidateSeed = seedCandidates.front();
 	seedCandidates.pop();
 	//Compute an initial streamline and make it current.
 	//Queue streamline Queue
@@ -224,7 +227,7 @@ void drawStreamLines(ReadData &data, SDLRenderer& renderer){
 
 	for (uint slIter = 0; slIter < finishedSLs.size(); ++slIter) {
 		Streamline sl = finishedSLs[slIter];
-		std::vector<point> curve = sl.getCurvePoints();
+		std::vector<WMpoint> curve = sl.getCurvePoints();
 		for (uint pointIter = 0; pointIter < curve.size()-1; ++pointIter) {
 			renderer.drawLine(curve);
 		}
@@ -287,7 +290,7 @@ float convolutionStartPoint(Streamline &stream, float weightLUT,
 	}
 	
 	//Set intensity
-	point p = stream.getStartPoint();
+	WMpoint p = stream.getStartPoint();
 	float intensity = texAccumulator / weightAccumulator;
 	outputImage[p.x][p.y] += intensity;
 	contributors[p.x][p.y]++;
@@ -300,12 +303,11 @@ void convolutionFwdAndBwd(float startI, Streamline stream, float weightLUT,
 						  vector<vector<float> > &outputImage){
 	float prevI = startI;
 	float pointWeight = 1.0; //Just a simple box function for now.
-	point streamStart = stream.getStartPoint();
-	vector<point> streamForward = stream.getCurveForwardPoints();
-	vector<point> streamBackwards = stream.getCurveBackwardPoints();
-	point p, prevPoint, pLeapFwdN, pLeapBwdN;
+	WMpoint streamStart = stream.getStartPoint();
+	vector<WMpoint> streamForward = stream.getCurveForwardPoints();
+	vector<WMpoint> streamBackwards = stream.getCurveBackwardPoints();
+	WMpoint p, prevPoint, pLeapFwdN, pLeapBwdN;
 	
-
 	//Find max M, half of shortest length
 	int minLength = (streamForward.size() < streamBackwards.size())
 					? streamForward.size() : streamBackwards.size();
@@ -330,7 +332,6 @@ void convolutionFwdAndBwd(float startI, Streamline stream, float weightLUT,
 		prevPoint = streamForward[m];
 	}
 	
-
 	//Backwards
 	prevPoint = streamStart;
 	prevI = startI;

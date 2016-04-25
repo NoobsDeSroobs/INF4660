@@ -39,7 +39,7 @@ void PutPixel32_nolock(SDL_Surface * surface, int x, int y, Uint32 color);
 void setupSDLWindow(string windName = "Main window", bool greyScale = false);
 void killSDL();
 int renderImgAtPos(int x, int y, int imgX, int imgY, int width, int height, double angle);
-void drawLine(std::vector<point> &curve);
+void drawLine(std::vector<WMpoint> &curve);
 void SetTexture(std::string path);
 void renderToScreen(){
 	SDL_UpdateWindowSurface( window );

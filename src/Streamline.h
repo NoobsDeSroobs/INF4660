@@ -17,10 +17,10 @@ class Streamline{
 		
 		int getLength();
 		float getStepSize();
-		point getStartPoint();
-		vector<point> getCurveForwardPoints();
-		vector<point> getCurveBackwardPoints();
-		vector<point> &getCurvePoints();
+		WMpoint getStartPoint();
+		vector<WMpoint> getCurveForwardPoints();
+		vector<WMpoint> getCurveBackwardPoints();
+		vector<WMpoint> getCurvePoints();
 		
 		bool isBiDirectional();
 		bool isCriticalPoint();
@@ -33,10 +33,10 @@ class Streamline{
 		bool criticalPoint;
 		INTEGRATION_METHOD integration;
 		
-		point startPoint;
-		vector<point> curveForwardPoints;
-		vector<point> curveBackwardPoints;
-		vector<point> allCurvePoints;
+		WMpoint startPoint;
+		vector<WMpoint> curveForwardPoints;
+		vector<WMpoint> curveBackwardPoints;
+		vector<WMpoint> allCurvePointss;
 		
 		void calcCurve();
 };
