@@ -25,8 +25,6 @@ void ReadData::readFromFile(string fileName, bool transpose, string groupName ,
 	float data_outX[dimsX[0]][dimsX[1]];
 	velXComp.read((void*)data_outX, H5::PredType::NATIVE_FLOAT, universeX, spaceX);
 	
-	
-	
 	cout << "Reading from dataset: " << compYName << endl;
 	H5::DataSet velYComp = velocity.openDataSet(compYName);
 	H5::DataSpace spaceY = velYComp.getSpace();
@@ -43,7 +41,7 @@ void ReadData::readFromFile(string fileName, bool transpose, string groupName ,
 			if(transpose){
 				dataXComp[k][i] = data_outY[i][k];
 			}else{
-				dataXComp[k][i] = data_outX[i][k];
+				dataXComp[i][k] = data_outY[i][k];
 			}
 		}
 	}
@@ -55,7 +53,7 @@ void ReadData::readFromFile(string fileName, bool transpose, string groupName ,
 			if(transpose){
 				dataYComp[k][i] = data_outX[i][k];
 			}else{
-				dataYComp[k][i] = data_outY[i][k];
+				dataYComp[i][k] = data_outX[i][k];
 			}
 		}
 	}
@@ -65,13 +63,12 @@ void ReadData::readFromFile(string fileName, bool transpose, string groupName ,
 }
 
 velVector ReadData::getVector(int x, int y){
-	if(x < 0 || x >= 500 || y < 0 || y >= 500 ){
+	if(x < 0 || x >= getWidth() || y < 0 || y >= getHeight() ){
 		fprintf(stderr, "Tried to access data %d, %d which is out of bounds\n", x, y);
 		return velVector(0, 0);
 	}
 	float xVel = dataXComp[x][y];
 	float yVel = dataYComp[x][y];
 	velVector returnVec(xVel, yVel);
-	returnVec.trueData = true;
 	return returnVec;
 }

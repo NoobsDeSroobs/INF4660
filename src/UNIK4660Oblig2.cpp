@@ -20,7 +20,7 @@
 #include <unistd.h>
 using namespace std;
 
-
+const static string imgFileName = "M10x10RK50S.bmp";
 void Test(SDLRenderer &renderer){
 	renderer.SetTexture("/home/noobsdesroobs/Downloads/arrow.bmp");
 	renderer.renderImgAtPos(50, 50, 0, 0, 300, 10, 45);
@@ -33,19 +33,18 @@ void drawLic(ReadData &data, SDLRenderer& renderer);
 
 //New methods, must be merged with the others
 //SDL_Texture createNoiseTexture(int width, int height);
-float* createWeightLUT(int size);
 float convolution(WMpoint pixelPoint);
 void doLICLoop(int dataset, int squareRes, int weightSize);
 
 void calculateRandomStreamLine(ReadData &data, SDLRenderer &renderer){
-	int length = 5000;
+	int length = 50;
 
 //282, 382
 
-	int stride = 500/10;
+	int stride = data.getHeight()/10;
 	float dataToPixelCoord = renderer.SCREEN_HEIGHT/data.getHeight();
-	for (int y = 0; y < 500; y = y + stride) {
-		for (int x = 0; x < 500; x = x + stride) {
+	for (int y = 0; y < data.getHeight(); y = y + stride) {
+		for (int x = 0; x < data.getHeight(); x = x + stride) {
 			Streamline stream(x, y, length, false, 0.25,
 						   RK, data);
 			vector<WMpoint> curve = stream.getCurvePoints();
@@ -97,7 +96,7 @@ int main() {
 				switch( event.key.keysym.sym ){
 				  case SDLK_DOWN:
 					printf( "Move time forward.\n" );
-					calculateRandomStreamLine(isabellData, renderer);
+					calculateRandomStreamLine(metsimData, renderer);
 					//drawStreamLines(isabellData, noiseImageRenderer);
 					//noiseImageRenderer.renderToScreen();
 
@@ -112,12 +111,12 @@ int main() {
 					RUNNING = false;
 					break;
 				  case SDLK_r:
-					  drawAllArrows(isabellData, renderer);
+					  drawAllArrows(metsimData, renderer);
 					  break;
 
 				  case SDLK_d:
 						renderer.renderToScreen();
-						SDL_SaveBMP(renderer.getMainSurface(), "Isabel.bmp");
+						SDL_SaveBMP(renderer.getMainSurface(), imgFileName.c_str());
 						break;
 				  default:
 
@@ -133,15 +132,15 @@ int main() {
 }
 
 void drawAllArrows(ReadData &data, SDLRenderer& renderer){
-	float xPixelStep = renderer.SCREEN_WIDTH/(float)data.getWidth();
-	float yPixelStep = renderer.SCREEN_HEIGHT/(float)data.getHeight();
+	float xPixelStep = 5;//renderer.SCREEN_WIDTH/(float)data.getWidth();
+	float yPixelStep = 5;//renderer.SCREEN_HEIGHT/(float)data.getHeight();
 	velVector baseVec(1.0f, 0.0f);
 	renderer.clear();
 	int ctr = 1;
 	float rad2deg = 180/M_PI;
 	//For each point. point.render()
-	for(unsigned int i = 0; i < data.getHeight(); i = i + 10){
-		for(unsigned int k = 0; k < data.getWidth(); k = k + 10){
+	for(unsigned int i = 0; i < data.getHeight(); i = i + 5){
+		for(unsigned int k = 0; k < data.getWidth(); k = k + 5){
 			ctr++;
 			velVector currentVec = data.getVector(k, i);
 			float vecLen = currentVec.length();
