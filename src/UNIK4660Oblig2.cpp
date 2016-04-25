@@ -47,7 +47,7 @@ void calculateRandomStreamLine(ReadData &data, SDLRenderer &renderer){
 	for (int y = 0; y < 500; y = y + stride) {
 		for (int x = 0; x < 500; x = x + stride) {
 			Streamline stream(x, y, length, false, 0.25,
-						   EULER, data);
+						   RK, data);
 			vector<WMpoint> curve = stream.getCurvePoints();
 			fprintf(stderr, "Seed x: %d, y: %d\n", x, y);
 			if(curve.size() > 10){

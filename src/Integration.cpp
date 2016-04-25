@@ -18,7 +18,7 @@ WMpoint Integrations::ForwardEuler(WMpoint u_prev, ReadData &reader, float stepS
 	
 	return u;
 }
-
+/*
 WMpoint Integrations::RungeKutta(WMpoint u_prev, ReadData &reader, float stepSize){
 	WMpoint u = WMpoint();
 	WMpoint tempStep = WMpoint();
@@ -59,6 +59,52 @@ WMpoint Integrations::RungeKutta(WMpoint u_prev, ReadData &reader, float stepSiz
 	u.x = u_prev.y + k_1.y/6 + k_2.y/3 + k_3.y/3 + k_4.y/6;
 	
 	return u;
+}*/
+
+
+WMpoint Integrations::RungeKutta(WMpoint u_prev, ReadData &reader, float stepSize){
+	vecData vDatak1, vDatak2, vDatak3, vDatak4;
+	float T4x, k1x, k2x, k3x, k4x, T4y, k1y, k2y, k3y, k4y;
+
+	if(!findVectorDataForPoint(u_prev, vDatak1, reader)){
+		return u_prev;
+	}
+
+	float length = vDatak1.length();
+	k1x = stepSize*(vDatak1.x/length);
+	k1y = stepSize*(vDatak1.y/length);
+	WMpoint u_k1(u_prev.x + (stepSize/2), u_prev.y + vDatak1.y*(stepSize/2));
+
+	if(!findVectorDataForPoint(u_k1, vDatak2, reader)){
+		return u_prev;
+	}
+
+	length = vDatak2.length();
+	k2x = stepSize*(vDatak2.x/length);
+	k2y = stepSize*(vDatak2.y/length);
+	WMpoint u_k2(u_prev.x + (stepSize/2), u_prev.y + vDatak2.y*(stepSize/2));
+
+	if(!findVectorDataForPoint(u_k2, vDatak3, reader)){
+		return u_prev;
+	}
+
+	length = vDatak3.length();
+	k3x = stepSize*(vDatak3.x/length);
+	k3y = stepSize*(vDatak3.y/length);
+	WMpoint u_k3(u_prev.x + stepSize, u_prev.y + vDatak3.y*stepSize);
+
+	if(!findVectorDataForPoint(u_k3, vDatak4, reader)){
+		return u_prev;
+	}
+
+	length = vDatak4.length();
+	k4x = stepSize*(vDatak3.x/length);
+	k4y = stepSize*(vDatak3.y/length);
+
+	T4x = (k1x + 2*k2x + 2*k3x + k4x)/6;
+	T4y = (k1y + 2*k2y + 2*k3y + k4y)/6;
+
+	return WMpoint(u_prev.x + T4x, u_prev.y + T4y);
 }
 
 bool Integrations::findVectorDataForPoint(WMpoint dataPoint, vecData &returnVec, ReadData &reader){
