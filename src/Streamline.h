@@ -17,7 +17,10 @@ class Streamline{
 		
 		int getLength();
 		float getStepSize();
-		vector<point> getCurvePoints();
+		point getStartPoint();
+		vector<point> getCurveForwardPoints();
+		vector<point> getCurveBackwardPoints();
+		vector<point> getCurvePoints();		
 		
 		bool isBiDirectional();
 		
@@ -31,6 +34,7 @@ class Streamline{
 		point startPoint;
 		vector<point> curveForwardPoints;
 		vector<point> curveBackwardPoints;
+		vector<point> allCurvePoints;
 		
 		void calcCurve();
 };

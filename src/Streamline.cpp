@@ -18,9 +18,19 @@ Streamline::~Streamline(){
 	
 }
 
-std::vector<point> Streamline::getCurvePoints(){
-	return std::vector<point>();
+point Streamline::getStartPoint(){
+	return startPoint;
 }
+vector<point> Streamline::getCurveForwardPoints(){
+	return curveForwardPoints;
+}
+vector<point> Streamline::getCurveBackwardPoints(){
+	return curveBackwardPoints;
+}
+vector<point> Streamline::getCurvePoints(){
+	return allCurvePoints;
+}
+
 int Streamline::getLength(){
 	return length;
 }
@@ -29,9 +39,8 @@ bool Streamline::isBiDirectional(){
 }
 void Streamline::calcCurve(){
 	point incForward, incBackward;
-	vecData activeVector;
-	curveForwardPoints.resize(length, point());
-	curveBackwardPoints.resize(length, point());
+	curveForwardPoints.resize(length-1, point());
+	curveBackwardPoints.resize(length-1, point());
 	
 	incBackward = incForward = startPoint;
 	for(int i = 0; i < length; i++){
@@ -53,4 +62,8 @@ void Streamline::calcCurve(){
 			curveBackwardPoints[i] = point(incBackward.x, incBackward.y);
 		}
 	}
+	
+	//allCurvePoints(curveBackwardPoints.begin(), curveBackwardPoints.end());
+	//curvePoints.insert(curvePoints.end(),startPoint);
+	//curvePoints.insert(curvePoints.end(), curveForwardPoints.begin(), curveForwardPoints.end() )
 }
