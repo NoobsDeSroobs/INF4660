@@ -10,7 +10,7 @@ WMpoint Integrations::ForwardEuler(WMpoint u_prev, ReadData &reader, float stepS
 		return u_prev;
 	}
 
-	fprintf(stderr, "Forward: Point: x: %f, y: %f > Vector: x: %f, y: %f\n", u_prev.x, u_prev.y, vData.x, vData.y);
+	//fprintf(stderr, "Forward: Point: x: %f, y: %f > Vector: x: %f, y: %f\n", u_prev.x, u_prev.y, vData.x, vData.y);
 	vecData vecNorm = vecData(vData.x / vData.length(), vData.y / vData.length());
 	
 	u.x = u_prev.x + stepSize * vecNorm.x;

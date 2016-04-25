@@ -38,21 +38,28 @@ float convolution(WMpoint pixelPoint);
 void doLICLoop(int dataset, int squareRes, int weightSize);
 
 void calculateRandomStreamLine(ReadData &data, SDLRenderer &renderer){
-	int length = 50;
+	int length = 5000;
 
-//282, 382,
-	Streamline stream(400, 250, length, true, 5,
-			   EULER, data);
+//282, 382
+
+	int stride = 500/10;
 	float dataToPixelCoord = renderer.SCREEN_HEIGHT/data.getHeight();
-
-	vector<WMpoint> curve = stream.getCurvePoints();
-	fprintf(stderr, "main");
-	for (uint var = 0; var < curve.size(); ++var) {
-		//fprintf(stderr, "CurvePoint %d: <%f, %f>\n", var, curve[var].x, curve[var].y);
-		curve[var].x = curve[var].x*dataToPixelCoord;
-		curve[var].y = curve[var].y*dataToPixelCoord;
+	for (int y = 0; y < 500; y = y + stride) {
+		for (int x = 0; x < 500; x = x + stride) {
+			Streamline stream(x, y, length, false, 0.25,
+						   EULER, data);
+			vector<WMpoint> curve = stream.getCurvePoints();
+			fprintf(stderr, "Seed x: %d, y: %d\n", x, y);
+			if(curve.size() > 10){
+				for (uint var = 0; var < curve.size(); ++var) {
+					//fprintf(stderr, "CurvePoint %d: <%f, %f>\n", var, curve[var].x, curve[var].y);
+					curve[var].x = curve[var].x*dataToPixelCoord;
+					curve[var].y = curve[var].y*dataToPixelCoord;
+				}
+				renderer.drawLine(curve);
+			}
+		}
 	}
-	renderer.drawLine(curve);
 }
 
 
@@ -110,6 +117,7 @@ int main() {
 
 				  case SDLK_d:
 						renderer.renderToScreen();
+						SDL_SaveBMP(renderer.getMainSurface(), "Isabel.bmp");
 						break;
 				  default:
 
@@ -156,7 +164,6 @@ void drawAllArrows(ReadData &data, SDLRenderer& renderer){
 			}
 		}
 	}
-	SDL_SaveBMP(renderer.getMainSurface(), "Isabel.bmp");
 }
 
 bool isIsolated(WMpoint seed, float d, Streamline &csl){

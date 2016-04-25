@@ -68,7 +68,7 @@ void Streamline::calcCurve(){
 		
 		if((increment.x == tempIncr.x && increment.y == tempIncr.y)	||
 		   (increment.x < 0 || increment.y < 0)){
-			curveForwardPoints.resize(i-1);
+			curveForwardPoints.resize(i);
 			break;//End point, do not store more of, or continue this direction
 		}
 
@@ -88,7 +88,7 @@ void Streamline::calcCurve(){
 			
 			if((increment.x == tempIncr.x && increment.y == tempIncr.y)	||
 			   (increment.x < 0 || increment.y < 0)){
-				curveForwardPoints.resize(i-1);
+				curveForwardPoints.resize(i);
 				break;//End point, do not store more of, or continue this direction
 			}
 			curveBackwardPoints[i] = WMpoint(increment.x, increment.y);

@@ -67,6 +67,7 @@ void ReadData::readFromFile(string fileName, bool transpose, string groupName ,
 velVector ReadData::getVector(int x, int y){
 	if(x < 0 || x >= 500 || y < 0 || y >= 500 ){
 		fprintf(stderr, "Tried to access data %d, %d which is out of bounds\n", x, y);
+		return velVector(0, 0);
 	}
 	float xVel = dataXComp[x][y];
 	float yVel = dataYComp[x][y];
