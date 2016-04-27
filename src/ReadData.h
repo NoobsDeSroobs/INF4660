@@ -3,28 +3,32 @@
 #include <H5Cpp.h>
 #include <math.h>
 #include <vector>
+using std::vector;
 #include "Integration.h"
 using std::string;
 
 
 
 class ReadData{
-	unsigned int width;
-	unsigned int height;
+	int width;
+	int height;
+	
 	public:
 		ReadData();
 		virtual ~ReadData();
 		
-		void readFromFile(string fileName,  bool transpose = false, string groupName = "Velocity",
+		void readFromHDF5File(string fileName,  bool transpose = false, string groupName = "Velocity",
 				string compXName = "X-comp", string compYName = "Y-comp");
+		
+		void readFromTextFile(string fileName, int rows, int columns);
 		
 		velVector getVector(int x, int y);
 		
-		unsigned int getWidth(){return width;}
-		unsigned int getHeight(){return height;}
+		int getWidth(){return width;}
+		int getHeight(){return height;}
 
 	private:
-		std::vector<std::vector<float>> dataXComp;
-		std::vector<std::vector<float>> dataYComp;
+		vector<std::vector<float>> dataXComp;
+		vector<std::vector<float>> dataYComp;
 		
 };

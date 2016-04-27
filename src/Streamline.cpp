@@ -50,35 +50,29 @@ bool Streamline::isCriticalPoint(){
 }
 
 void Streamline::calcCurve(){
-	WMpoint increment, tempIncr;
+	WMpoint increment;
 	curveForwardPoints.resize(length, WMpoint());
 	if(biDirectional){
 		curveBackwardPoints.resize(length, WMpoint());
 	}
-
+	
 	increment = startPoint;
 	for(int i = 0; i < length; i++){
-		tempIncr = increment;
 		if(integration == EULER){
 			increment = Integrations::ForwardEuler(increment, reader, stepSize);
 		}
 		else{
 			increment = Integrations::RungeKutta(increment, reader, stepSize);
 		}
-		
-		if((increment.x == tempIncr.x && increment.y == tempIncr.y)	||
-		   (increment.x >= reader.getWidth() || increment.y >= reader.getHeight())	||
-		   (increment.x < 0 || increment.y < 0)){
+		if(!increment.isValid || (increment.x < 0 || increment.y < 0)){
 			curveForwardPoints.resize(i);
 			break;//End point, do not store more of, or continue this direction
 		}
-
 		curveForwardPoints[i] = WMpoint(increment.x, increment.y);
 	}
 	
 	increment = startPoint;
 	for(int i = 0; i < length; i++){
-		tempIncr = increment;
 		if(biDirectional){
 			if(integration == EULER){
 				increment = Integrations::ForwardEuler(increment, reader, -stepSize);
@@ -86,11 +80,8 @@ void Streamline::calcCurve(){
 			else{
 				increment = Integrations::RungeKutta(increment, reader, -stepSize);
 			}
-			
-			if((increment.x == tempIncr.x && increment.y == tempIncr.y)	||
-			   (increment.x >= reader.getWidth() || increment.y >= reader.getHeight())	||
-			   (increment.x < 0 || increment.y < 0)){
-				curveForwardPoints.resize(i);
+			if(!increment.isValid || (increment.x < 0 || increment.y < 0)){
+				curveBackwardPoints.resize(i);
 				break;//End point, do not store more of, or continue this direction
 			}
 			curveBackwardPoints[i] = WMpoint(increment.x, increment.y);
@@ -98,12 +89,12 @@ void Streamline::calcCurve(){
 	}
 	
 	if(biDirectional){
-		for (int i = curveBackwardPoints.size()-1; i >= 0; --i) {
-			allCurvePoints.push_back(curveBackwardPoints[i]);
+		for (uint i = curveBackwardPoints.size(); i > 0; i--) {
+			allCurvePoints.push_back(curveBackwardPoints[i-1]);
 		}
 	}
 	allCurvePoints.push_back(startPoint);
-	for (int i = 0; i < curveForwardPoints.size(); ++i) {
-		allCurvePoints.push_back(WMpoint(curveForwardPoints[i].x, curveForwardPoints[i].y));
+	for (uint i = 0; i < curveForwardPoints.size(); ++i) {
+		allCurvePoints.push_back(curveForwardPoints[i]);
 	}
 }

@@ -84,6 +84,8 @@ For our implementation, both for the Field Line Integration and LIC, we have cho
 \\
 During the integration, handling of critical points is done by simply ignoring the point if it is used as the origin. Interpolation uses it as any other vector in the field.
 Should the integration try to pass beyond the boundaries of the vector field, we stop the integration in that direction. In the LIC implementation this has the effect of cutting short the convolution in both directions.
+\\
+Using the 2L = 1/10 of resolution
 
 \subsection{Forward Euler}
 The forward Euler integration scheme is the simplest of the two schemes. 

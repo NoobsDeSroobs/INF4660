@@ -63,15 +63,20 @@ int main() {
 	renderer.setupSDLWindow();
 	//SDLRenderer noiseImageRenderer(renderer.SCREEN_WIDTH, renderer.SCREEN_HEIGHT);
 	//noiseImageRenderer.setupSDLWindow("Noise Image", true);
-	renderer.SetTexture("/home/wilhelm/Downloads/arrow.bmp");
+	//renderer.SetTexture("/home/wilhelm/Downloads/arrow.bmp");
 
 	string isabellPath = "/home/wilhelm/Downloads/data/isabel_2d.h5";
 	string metsimPath = "/home/wilhelm/Downloads/data/metsim1_2d.h5";
+	
+	string asciiNameIsabel = "../Data/ascii_isabel";
+	string asciiNameMetsim = "../Data/ascii_metsim";
 
-	ReadData isabellData;
-	isabellData.readFromFile(isabellPath, true);
+	ReadData isabelData;
+	isabelData.readFromHDF5File(isabellPath, true);
+	//isabelData.readFromAscII(asciiNameIsabel, 500, 500);
 	ReadData metsimData;
-	metsimData.readFromFile(metsimPath, false);
+	metsimData.readFromHDF5File(metsimPath, false);
+	//metsimData.readFromAscII(asciiNameMetsim, 127, 127);
 	
 	bool RUNNING = true;
 	/* An SDL_Event */
@@ -89,7 +94,7 @@ int main() {
 			if(event.type == SDL_KEYDOWN){
 				switch( event.key.keysym.sym ){
 				  case SDLK_DOWN:
-					calculateRandomStreamLine(isabellData, renderer);
+					calculateRandomStreamLine(isabelData, renderer);
 					//drawStreamLines(isabellData, noiseImageRenderer);
 					//noiseImageRenderer.renderToScreen();
 					break;
@@ -100,7 +105,7 @@ int main() {
 						break;
 						
 					case SDLK_r:
-						drawAllArrows(isabellData, renderer);
+						drawAllArrows(isabelData, renderer);
 						break;
 					
 					case SDLK_d:
@@ -115,7 +120,7 @@ int main() {
 					
 					case SDLK_i:
 						renderer.clear();
-						doLICLoop(isabellData, renderer);
+						doLICLoop(isabelData, renderer);
 						renderer.renderToScreen();
 						SDL_SaveBMP(renderer.getMainSurface(), "Isabel.bmp");
 					case SDLK_m:
@@ -142,8 +147,8 @@ void drawAllArrows(ReadData &data, SDLRenderer& renderer){
 	int ctr = 1;
 	float rad2deg = 180/M_PI;
 	//For each point. point.render()
-	for(unsigned int i = 0; i < data.getHeight(); i = i + 5){
-		for(unsigned int k = 0; k < data.getWidth(); k = k + 5){
+	for(int i = 0; i < data.getHeight(); i = i + 5){
+		for(int k = 0; k < data.getWidth(); k = k + 5){
 			ctr++;
 			velVector currentVec = data.getVector(k, i);
 			float vecLen = currentVec.length();
@@ -190,8 +195,8 @@ void drawStreamLines(ReadData &data, SDLRenderer& renderer){
 	std::queue<Streamline> SLQueue;
 
 	//Build candidates
-	for (uint y = 0; y < data.getHeight(); y = y + stride) {
-		for (uint x = 0; x < data.getWidth(); x = x + stride) {
+	for (int y = 0; y < data.getHeight(); y = y + stride) {
+		for (int x = 0; x < data.getWidth(); x = x + stride) {
 			seedCandidates.push(WMpoint(x, y));
 		}
 	}
@@ -266,9 +271,8 @@ float convolutionStartPoint(Streamline &stream, float weightLUT,
 	
 	float weightAccumulator = 0.0;
 	float texAccumulator = 0.0;
-	float pointWeight = 1; //weightLUT[] //Ignore weight for now, just use average, 
-											 //is this the same as a constant filter kernel
-											 //which fast lic needs?
+	float pointWeight = weightLUT;
+	
 	//Build accumulators
 	for(auto &p : stream.getCurvePoints()){
 		weightAccumulator += pointWeight; 
@@ -276,9 +280,9 @@ float convolutionStartPoint(Streamline &stream, float weightLUT,
 	}
 	
 	//Set intensity
+	float intensity = texAccumulator / weightAccumulator; //Averages it
 	WMpoint p = stream.getStartPoint();
-	float intensity = texAccumulator / weightAccumulator;
-	outputImage[p.x][p.y] += intensity;
+	outputImage[p.x][p.y] += intensity;	
 	contributors[p.x][p.y]++;
 	
 	return intensity;
@@ -287,61 +291,58 @@ void convolutionFwdAndBwd(float startI, Streamline stream, float weightLUT,
 						  vector<vector<int> > &contributors, 
 						  vector<vector<float> > const &noiseTexture,
 						  vector<vector<float> > &outputImage){
-	float prevI = startI;
-	float pointWeight = 1.0; //Just a simple box function for now.
+	float prevI;
 	WMpoint streamStart = stream.getStartPoint();
 	vector<WMpoint> streamForward = stream.getCurveForwardPoints();
 	vector<WMpoint> streamBackwards = stream.getCurveBackwardPoints();
-	WMpoint p, prevPoint, pLeapFwdN, pLeapBwdN;
+	WMpoint p, pLeapFwdN, pLeapBwdN;
 	
 	//Find max M, half of shortest length
 	int minLength = (streamForward.size() < streamBackwards.size())? streamForward.size() : streamBackwards.size();
 	int M = minLength / 2;
-	int n = M;
+	double weight = 1.0 /minLength * 2;
 	
 	//Forwards
-	prevPoint = streamStart;
-	for(int m = 0; m < M; m++){
-		p = streamForward[m];
-		pLeapFwdN = streamForward[m+n];
-		pLeapBwdN = (n-1 > m) ? streamBackwards[n-1 - m] : streamStart;
+	prevI = startI;
+	for(int m1 = 0; m1 < M; m1++){
+		p = streamForward[m1];
+		pLeapFwdN = streamForward[m1+M];
+		pLeapBwdN = (M-1 > m1) ? streamBackwards[M-1 - m1] : streamStart;
 		
 		//I(Xm+1) = I(Xm) + k*( T(Xm+1+n) - T(Xm-n) )
-		float intensity = prevI + pointWeight * (noiseTexture[pLeapFwdN.x][pLeapFwdN.y] - 
-												 noiseTexture[pLeapBwdN.x][pLeapBwdN.y]);
+		float intensity = prevI + weight * (noiseTexture[pLeapFwdN.x][pLeapFwdN.y] - 
+											noiseTexture[pLeapBwdN.x][pLeapBwdN.y]); //Interpolering av textur verdi?		
 		
 		outputImage[p.x][p.y] += intensity;
 		contributors[p.x][p.y]++; //Should expect this is needed?
 		
 		prevI = intensity;
-		prevPoint = streamForward[m];
 	}
 	
 	//Backwards
-	prevPoint = streamStart;
 	prevI = startI;
-	for(int m = 0; m < M; m++){
-		p = streamBackwards[m];
-		pLeapBwdN = streamBackwards[m+n];
-		pLeapFwdN = (n-1 > m) ? streamForward[n-1 - m] : streamStart;
+	for(int m1 = 0; m1 < M; m1++){
+		p = streamBackwards[m1];
+		pLeapBwdN = streamBackwards[m1+M];
+		pLeapFwdN = (M-1 > m1) ? streamForward[M-1 - m1] : streamStart;
 		
 		//I(Xm-1) = I(Xm) + k*( T(Xm-1-n) - T(Xm+n) )
-		float intensity = prevI + pointWeight * (noiseTexture[pLeapBwdN.x][pLeapBwdN.y] - 
-												 noiseTexture[pLeapFwdN.x][pLeapFwdN.y]);
+		float intensity = prevI + weight * (noiseTexture[pLeapBwdN.x][pLeapBwdN.y] + 
+											noiseTexture[pLeapFwdN.x][pLeapFwdN.y]);
 		
 		outputImage[p.x][p.y] += intensity;
 		contributors[p.x][p.y]++; //Should expect this is needed?
 		
 		prevI = intensity;
-		prevPoint = streamBackwards[m];
 	}
 }
 //Loop for LIC
 void doLICLoop(ReadData &dataset, SDLRenderer &renderer){
 	//Run variables:
 	int squareRes = 500;
+	int streamLength = squareRes * 0.20; //Fast LIC supposed to used 1/10 of 2 * resolution length
 	bool bidirectional = true;
-	float stepSize = 0.5f;
+	float stepSize = 0.5;
 	INTEGRATION_METHOD inter = EULER;
 	
 	//Create noise and output image
@@ -350,7 +351,6 @@ void doLICLoop(ReadData &dataset, SDLRenderer &renderer){
 	createNoiseTexture(squareRes, squareRes, noiseTexture);
 	
 	//Variables
-	int streamLength = squareRes * 0.20;
 	float weightLUT = 1; //We only use a simple box filter for now
 	
 	//Fast LIC counters
@@ -359,6 +359,7 @@ void doLICLoop(ReadData &dataset, SDLRenderer &renderer){
 	
 	//Loop
 	for(int x = 0; x < squareRes; x++){
+		fprintf(stderr, "x:%d", x);
 		for(int y = 0; y < squareRes; y++){
 			if(contributors[x][y] >= maxContributors){
 				continue;

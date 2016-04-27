@@ -7,13 +7,16 @@ class ReadData;
 struct WMpoint{
 	float x;
 	float y;
+	bool isValid;
 	
 	WMpoint(){
 		x = 0.0;
 		y = 0.0;
+		isValid = true;
 	}
 	
 	WMpoint(float x, float y): x(x), y(y){
+		isValid = true;
 	}
 
 	float distanceTo(WMpoint other){
@@ -24,6 +27,7 @@ struct WMpoint{
 	float length(){
 		return sqrt(pow(x, 2) + pow(y, 2));
 	}
+	
 };
 
 struct vecData{
@@ -36,6 +40,7 @@ struct vecData{
 		x = 0;
 		y = 0;
 		trueData = false;
+		isValid = true;
 	}
 	vecData(float x, float y): x(x), y(y), trueData(false), isValid(true){
 	
@@ -56,7 +61,8 @@ class Integrations{
 		static bool findVectorDataForPoint(WMpoint dataPoint, vecData &returnVec, ReadData &reader);
 		static vecData interpolateVectorData(int x1, int x2, int y1, int y2, int x, int y,
 											 ReadData &reader);
-		static vecData BilinearInterpolation(float x1, float x2, float y1, float y2, float x, float y, ReadData &reader);
+		static bool BilinearInterpolation(vecData &returnVec, float x1, float x2, float y1, 
+										  float y2, float x, float y, ReadData &reader);
 
 };
 

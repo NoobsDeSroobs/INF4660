@@ -1,18 +1,21 @@
 #include "ReadData.h"
 
+#include <fstream>
+using std::ifstream;
 #include <iostream>
 using std::cout; using std::endl;
+#include <string>
+using std::string;
+
 
 ReadData::ReadData(){}
 ReadData::~ReadData(){}
 
-void ReadData::readFromFile(string fileName, bool transpose, string groupName ,
+void ReadData::readFromHDF5File(string fileName, bool transpose, string groupName ,
 							string compXName , string compYName){
 	cout << "Reading from file: " << fileName << endl;
 	H5::H5File file (fileName, H5F_ACC_RDONLY);
 	H5::Group velocity = file.openGroup(groupName);
-	
-	
 	
 	cout << "Reading from dataset: " << compXName << endl;
 	H5::DataSet velXComp = velocity.openDataSet(compXName);
@@ -60,6 +63,57 @@ void ReadData::readFromFile(string fileName, bool transpose, string groupName ,
 
 
 	file.close();
+}
+
+void ReadData::readFromTextFile(std::string fileName, int rows, int columns){	
+	string xPath = fileName + ".x";
+	string yPath = fileName + ".y";
+	
+	//FILE *xFile = fopen(xPath.c_str(), "r");
+	//FILE *yFile = fopen(yPath.c_str(), "r");
+	
+	std::ifstream xFile(xPath);
+	std::ifstream yFile(yPath);
+	
+	if (!xFile || !yFile) {
+		printf("Bad filename x: %s\n", fileName.c_str());
+		printf("Bad filename y: %s\n", fileName.c_str());
+		return;
+	}
+	
+	dataXComp.resize(rows, std::vector<float>(columns));
+	dataYComp.resize(rows, std::vector<float>(columns));
+	
+	float component;
+	int rowCounter = 0; int colCounter = 0;
+	while(xFile >> component){
+		dataXComp[rowCounter][colCounter] = component;
+		
+		colCounter++;
+		if(colCounter == columns){
+			rowCounter++;
+			colCounter = 0;
+		}
+		if(rowCounter == rows)
+			break;
+	}
+	
+	rowCounter = 0; colCounter = 0;
+	while(yFile >> component){
+		dataYComp[rowCounter][colCounter] = component;
+		
+		colCounter++;
+		if(colCounter == columns){
+			rowCounter++;
+			colCounter = 0;
+		}
+		if(rowCounter == rows)
+			break;
+	}
+	
+	xFile.close();
+	yFile.close();
+	printf("Loaded files: %s\n", fileName.c_str());
 }
 
 velVector ReadData::getVector(int x, int y){
