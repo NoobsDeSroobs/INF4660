@@ -14,6 +14,9 @@
 \usepackage{enumitem} % Points/lists
 \usepackage{url}
 \usepackage{hyperref}
+\usepackage{caption}
+\usepackage{subcaption}
+\DeclareGraphicsExtensions{.png}
 
 \definecolor{red}{RGB}{255,10,10}
 
@@ -44,23 +47,24 @@ frame=l,
 \newcommand{\spac}{\hspace{5mm}}
 
 \title{UNIK4660 - Assignment 2}
-\author{Wilhelm Karlsen and Magnus Eden}
+\author{Wilhelm Karlsen and Magnus Elden}
 \date{\today}
 
 \begin{document}
 \maketitle
-In this assignment we are first to visualize two sets of vector fields by their field lines. Secondly, to create a Line Integral Convolution(LIC) implementation and show its functionality on these fields. The vector field are given in the form of two .hdf5 files and are two different hurricane simulations, Isabel and Metsim. 
+In this assignment we are first to visualize two sets of vector fields by their field lines. Secondly, to create a Line Integral Convolution(LIC) implementation and show its functionality on these fields. The vector field are given in the form of two .hdf5 files and are two different hurricane simulations, Isabel and Metsim.
+
 \\
 We are also to implement and compare different integration methods, specifically Forward Euler and Fourth Order Runge-Kutta, and use differently sized convolution kernels. The results are shown and discussed at the end of this report.
 
 \section{Field Line Visualization}
-Visualization of field lines are very dependent on the points, called seed points, from which the streamlines are calculated. Passing over the vector field and using everything for streamline will simply give a chaotic and unusable image. Seed point strategies are therefore employed to find the best start point for each streamline. 
+Visualization of field lines are intended to represent the vector field as numerous lines conforming to its orientation. This method is very dependent on the points, called seed points, from which the streamlines are calculated. Passing over the vector field and using everything for streamline would simply give a chaotic and unusable image. Seed point strategies are therefore employed to find the best start point for each streamline. 
 \\
-We have chosen to test evenly spaced seed points, as well as the "equal distance" seed point strategy.
+We have chosen to test evenly spaced seed points, as well as randomly generated points with no restrictions.
 
 \section{Line Integral Convolution}
-LIC is a visualization technique used to show the motion and flow in fluids. Using a simple gray-scale noise image it generates a texture by taking every pixel in the image and running it through a convolution kernel. The intended effect is lines that follow the vector field, and gives good, intuitive understanding of the flow direction. The lines are kept distinct by the varying gray scales, though they can be given different colors to help show additional system information, such as the vector magnitude.
-
+LIC is a visualization technique used to show the motion and flow in fluids. Using a simple gray-scale noise image it generates a texture by taking every pixel in the image and running it through a convolution kernel. The intended effect is lines that follow the vector field, and gives good, intuitive understanding of the flow direction. The lines are kept distinct by the varying gray scales, though they can also be given different colors to help show additional information, such as the vector magnitude.
+\\
 Given a field line $\sigma$, the operation can be described by
 \begin{align*}
 	I(x_0) = \int_{S_0+L}^{S_0-L}k(s - s_0)T(\sigma(s))ds
@@ -80,21 +84,20 @@ This allows the convolution of the streamline in both directions as we pass over
 This should help speed up the execution. However, as we did not implement normal LIC, we do not have anything to compare it to.
 
 \section{Implementation}
-For our implementation, both for the Field Line Integration and LIC, we have chosen to use Simple DirectMedia Layer(SDL) library for the graphical representation. The library have allowed us to quickly see the effect of any changes we have done in the code.
+For our implementation, both geometric field lines and LIC, we have chosen to use Simple DirectMedia Layer(SDL) library for the graphical representation. The library have allowed us to quickly see the effect of any changes we have done in the code.
 \\
-During the integration, handling of critical points is done by simply ignoring the point if it is used as the origin. Interpolation uses it as any other vector in the field.
-Should the integration try to pass beyond the boundaries of the vector field, we stop the integration in that direction. In the LIC implementation this has the effect of cutting short the convolution in both directions.
+During the integration we handle critical points by simply ignoring the point if it is used as the origin. If the field line integration reaches one, it stops there. Interpolation uses it as any other vector in the field.
 \\
-Using the 2L = 1/10 of resolution
+Should the integration try to pass beyond the boundaries of the vector field, we stop the integration in that direction. In the LIC implementation this has the effect of cutting short the convolution in both directions since we are using the Fast LIC algorithm.
 
-\subsection{Forward Euler}
+\subsection{Forward Euler integration}
 The forward Euler integration scheme is the simplest of the two schemes. 
 \begin{align*}
 	\psi_{n+1} =& \psi_n + hf(x_n, y_n)
 \end{align*}
 With $\psi_n$ as the current coordinates for the output image, $h$ as the step size and $f$ as the vector field function.
 
-\subsection{Fourth Order Runge-Kutta}
+\subsection{Fourth Order Runge-Kutta integration}
 Runge-Kutta is a bit more complicated, and where Euler takes the step in one go, RK divides it into four parts.
 \begin{align*}
 	k_1 =& f(x_n, y_n)h	\\
@@ -106,10 +109,27 @@ Runge-Kutta is a bit more complicated, and where Euler takes the step in one go,
 
 
 \section{Results}
+In this section we show the result of using both the Euler and the Runge-Kutta methods. We also vary the number of iterations to see the difference in computational cost for the integration and required interpolation.
 
-Step size
-streamline/filter-core length
-Euler vs RungeKutta
+\begin{figure}[ht]
+\centering
+\hspace*{-2.5cm}
+\begin{subfigure}{.7\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{beatyIsabel}
+  \caption{A subfigure}
+  \label{fig:sub1}
+\end{subfigure}%
+\begin{subfigure}{.7\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{beatyIsabel}
+  \caption{A subfigure}
+  \label{fig:sub2}
+\end{subfigure}
+\caption{A figure with two subfigures}
+\label{fig:test}
+\end{figure}
+
 
 
 \subsection{Forward Euler: FilterVariations}
@@ -120,6 +140,19 @@ Euler vs RungeKutta
 
 %\includegraphics[scale=1.0]{PathFileName}
 
-\section{Conclusion and Comparison}
+\section{Comparisons and Conclusion}
 
+Unfortunatly, we have a flaw in our algorithm which flipps sections of the vector sets causing our results to differ greatly from the examples provided. This is especially noticable in the visualization of the Metsim dataset, where the vectors are almost all diagonal in contrast with the oval example. In Isabel some of the vectors seem mirrored, but the vortex is still in the, according to the example, correct position. 
+
+\subsection{Streamlines}
+In general the 4th Order Runge Kutta interpolation proved itself to create the smoothest and most beautiful streamlines. Forward Euler had a tendency to rotate its direction more rapidly resulting in sharper turns and more ragged looking streamlines. The two methods we tried were 10x10 evenly spread seedpoints throughout the image and 100 randomly selected seed points. The randomly selected seedpoints usually resulted in worse results with more cluttering when used with the isabel dataset, while due to the specific nature of our metsim dataset it generally performed better. Since evenly spaced seedpoints in a field moving along the diagonal caused most points to follow the same path causing major cluttering and drastically lowered the informative value of the visualization. We used a max streamline length of 500 for the isabela set, while 100 seemed to be appropriate for the metsim set. Chosing a smaller length or a higher length ended up with partial loss of the sense of flow and kluttering, respectivly. In all cases the stepsize was 0.25.
+
+\subsection{Line Integral Convolution}
+The Euler integration result ended u
+
+
+\subsection{Geometric field lines vs LIC}
+The geometric field line visualization gave a good overview, though some detail was lost compared to the LIC. As we did not use any complicated seeding strategies it was almost instantaneous. We still saw the begininng of the spiral in Isabel, but only a slight curve in Metsim. It is likely that with another seeding strategy, we would have gotten better details.
+\\
+In contrast, the LIC gave a highly detailed result which were easy to interpret. Though there is a use for both, the quality and ease of interpretation of the LIC makes it superior to the geometric method, when efficiency and speed is not an issue.
 \end{document}

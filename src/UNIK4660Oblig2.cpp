@@ -74,24 +74,30 @@ void calculate10X10StreamLine(ReadData &data, SDLRenderer &renderer){
 
 void calculateRandomStreamLine(ReadData &data, SDLRenderer &renderer){
 	int length = 500;
+	float dataToPixelCoord = renderer.SCREEN_HEIGHT/(float)data.getHeight();
 	
 	//282, 382
 	
-	int stride = data.getHeight()/10;
-	float dataToPixelCoord = renderer.SCREEN_HEIGHT/(float)data.getHeight();
-	for (int y = 0; y < data.getHeight(); y = y + stride) {
-		for (int x = 0; x < data.getHeight(); x = x + stride) {
-			Streamline stream(x, y, length, false, 0.25, RK, data);
-			vector<WMpoint> curve = stream.getCurvePoints();
-			fprintf(stderr, "Seed x: %d, y: %d\n", x, y);
-			if(curve.size() > 10 && !stream.isCriticalPoint()){
-				for (uint var = 0; var < curve.size(); ++var) {
-					//fprintf(stderr, "CurvePoint %d: <%f, %f>\n", var, curve[var].x, curve[var].y);
-					curve[var].x = curve[var].x*dataToPixelCoord;
-					curve[var].y = curve[var].y*dataToPixelCoord;
-				}
-				renderer.drawLine(curve);
+	int counter = 0;
+	while(counter < 50){
+		counter++;
+		float x = rand();
+		x = (int)x%(data.getHeight()*1000);
+		x = x / 1000;
+		float y = rand();
+		y = (int)y%(data.getHeight()*1000);
+		y = y / 1000;
+
+		Streamline stream(x, y, length, false, 0.25, RK, data);
+		vector<WMpoint> curve = stream.getCurvePoints();
+		fprintf(stderr, "Seed x: %d, y: %d\n", x, y);
+		if(curve.size() > 10 && !stream.isCriticalPoint()){
+			for (uint var = 0; var < curve.size(); ++var) {
+				//fprintf(stderr, "CurvePoint %d: <%f, %f>\n", var, curve[var].x, curve[var].y);
+				curve[var].x = curve[var].x*dataToPixelCoord;
+				curve[var].y = curve[var].y*dataToPixelCoord;
 			}
+			renderer.drawLine(curve);
 		}
 	}
 }
@@ -126,14 +132,15 @@ void completeRun(ReadData &dataset1, ReadData &dataset2, SDLRenderer &renderer, 
 //This system is LITTLE ENDIAN!!!!
 int main() {
 	//Run variables:
-	int squareRes = 500;
-	int streamLength = squareRes * 0.20; //Fast LIC supposed to used 1/10 of 2 * resolution length
+	int squareRes = 1000;
+	int streamLength = 20; //Fast LIC supposed to used 1/10 of 2 * resolution length
 	bool bidirectional = true;
 	float stepSize = 0.25;
 	INTEGRATION_METHOD inter = EULER;
 	
 	SDLRenderer renderer(squareRes, squareRes);
 	renderer.setupSDLWindow();
+	renderer.SetTexture("arrow.bmp");
 
 	string isabelPath = "../Data/isabel_2d.h5";
 	string metsimPath = "../Data/metsim1_2d.h5";
@@ -163,9 +170,16 @@ int main() {
 			/* If a quit event has been sent */
 			if(event.type == SDL_KEYDOWN){
 				switch( event.key.keysym.sym ){
-				  case SDLK_DOWN:
+
+				case SDLK_UP:
 					  paintCriticalTOBlack(metsimData, renderer);
-					calculate10X10StreamLine(metsimData, renderer);
+					calculateRandomStreamLine(metsimData, renderer);
+					//drawStreamLines(isabellData, noiseImageRenderer);
+					//noiseImageRenderer.renderToScreen();
+					break;
+				  case SDLK_DOWN:
+					  paintCriticalTOBlack(isabelData, renderer);
+					calculate10X10StreamLine(isabelData, renderer);
 					//drawStreamLines(isabellData, noiseImageRenderer);
 					//noiseImageRenderer.renderToScreen();
 					break;
@@ -355,7 +369,7 @@ float convolutionStartPoint(Streamline &stream, float weightLUT,
 	float texAccumulator = 0.0;
 	float pointWeight = weightLUT;
 	//Build accumulators
-	for(auto &p : stream.getCurvePoints()){
+	for(WMpoint p: stream.getCurvePoints()){
 		weightAccumulator += pointWeight; 
 		texAccumulator += noiseTexture[p.x*dataToPixel][p.y*dataToPixel] * pointWeight;
 	}
@@ -444,7 +458,7 @@ void doLICLoop(ReadData &dataset, SDLRenderer &renderer, int squareRes, int stre
 			}
 			
 			//Find streamline for current point
-			Streamline stream(x*pixelToData, y*pixelToData, streamLength, bidirectional, stepSize, inter, dataset);
+			Streamline stream(x, y, streamLength, bidirectional, stepSize, inter, dataset);
 			if(!stream.getStartPoint().isValid){
 				continue;
 			}
