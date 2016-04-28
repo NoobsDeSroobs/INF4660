@@ -55,10 +55,10 @@ class Integrations{
 	public:
 		static WMpoint ForwardEuler(WMpoint u_prev, ReadData &reader, float stepSize);
 		static WMpoint RungeKutta(WMpoint u_prev, ReadData &reader, float stepSize);
+		static bool findVectorDataForPoint(WMpoint dataPoint, vecData &returnVec, ReadData &reader);
 		
 	private:
 		float RKPartial (WMpoint u_prev, ReadData &reader, float stepSize);
-		static bool findVectorDataForPoint(WMpoint dataPoint, vecData &returnVec, ReadData &reader);
 		static vecData interpolateVectorData(int x1, int x2, int y1, int y2, int x, int y,
 											 ReadData &reader);
 		static bool BilinearInterpolation(vecData &returnVec, float x1, float x2, float y1, 

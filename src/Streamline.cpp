@@ -3,7 +3,7 @@
 #include "Integration.h"
 #include "ReadData.h"
 
-Streamline::Streamline(int x, int y, int length, bool biDirectional, float stepSize,
+Streamline::Streamline(float x, float y, int length, bool biDirectional, float stepSize,
 					   INTEGRATION_METHOD integration, ReadData &reader){
 	startPoint = WMpoint(x, y);
 	this->length = length;
@@ -12,15 +12,9 @@ Streamline::Streamline(int x, int y, int length, bool biDirectional, float stepS
 	this->integration = integration;
 	this->reader = reader;
 	
-	//Critical point handling and curve calculation
-	vecData vec = reader.getVector(x, y);
-	if(vec.x == 0 && vec.y == 0){
-		criticalPoint = true;
-	}
-	else{
-		criticalPoint = false;
-		calcCurve();
-	}
+
+	criticalPoint = false;
+	calcCurve();
 }
 Streamline::~Streamline(){
 	
@@ -87,7 +81,7 @@ void Streamline::calcCurve(){
 			curveBackwardPoints[i] = WMpoint(increment.x, increment.y);
 		}
 	}
-	
+
 	if(biDirectional){
 		for (uint i = curveBackwardPoints.size(); i > 0; i--) {
 			allCurvePoints.push_back(curveBackwardPoints[i-1]);

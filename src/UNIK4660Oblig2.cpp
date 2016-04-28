@@ -96,7 +96,7 @@ void calculateRandomStreamLine(ReadData &data, SDLRenderer &renderer){
 
 //This system is LITTLE ENDIAN!!!!
 int main() {
-	SDLRenderer renderer(1000, 1000);
+	SDLRenderer renderer(500, 500);
 	renderer.setupSDLWindow();
 	//SDLRenderer noiseImageRenderer(renderer.SCREEN_WIDTH, renderer.SCREEN_HEIGHT);
 	//noiseImageRenderer.setupSDLWindow("Noise Image", true);
@@ -310,30 +310,29 @@ void createNoiseTexture(int width, int height, vector<vector<float>> &img){
 float convolutionStartPoint(Streamline &stream, float weightLUT, 
 						   vector<vector<int> > &contributors, 
 						   vector<vector<float> > const &noiseTexture,
-						   vector<vector<float> > &outputImage){
+						   vector<vector<float> > &outputImage, float dataToPixel){
 	
 	float weightAccumulator = 0.0;
 	float texAccumulator = 0.0;
 	float pointWeight = weightLUT;
-	
 	//Build accumulators
 	for(auto &p : stream.getCurvePoints()){
 		weightAccumulator += pointWeight; 
-		texAccumulator += noiseTexture[p.x][p.y] * pointWeight;
+		texAccumulator += noiseTexture[p.x*dataToPixel][p.y*dataToPixel] * pointWeight;
 	}
 	
 	//Set intensity
 	float intensity = texAccumulator / weightAccumulator; //Averages it
 	WMpoint p = stream.getStartPoint();
-	outputImage[p.x][p.y] += intensity;	
-	contributors[p.x][p.y]++;
+	outputImage[p.x*dataToPixel][p.y*dataToPixel] += intensity;
+	contributors[p.x*dataToPixel][p.y*dataToPixel]++;
 	
 	return intensity;
 }
 void convolutionFwdAndBwd(float startI, Streamline stream, float weightLUT,
 						  vector<vector<int> > &contributors, 
 						  vector<vector<float> > const &noiseTexture,
-						  vector<vector<float> > &outputImage){
+						  vector<vector<float> > &outputImage, float dataToPixel){
 	float prevI;
 	WMpoint streamStart = stream.getStartPoint();
 	vector<WMpoint> streamForward = stream.getCurveForwardPoints();
@@ -345,6 +344,7 @@ void convolutionFwdAndBwd(float startI, Streamline stream, float weightLUT,
 	int M = minLength / 2;
 	double weight = 1.0 /minLength * 2;
 	
+
 	//Forwards
 	prevI = startI;
 	for(int m1 = 0; m1 < M; m1++){
@@ -353,11 +353,11 @@ void convolutionFwdAndBwd(float startI, Streamline stream, float weightLUT,
 		pLeapBwdN = (M-1 > m1) ? streamBackwards[M-1 - m1] : streamStart;
 		
 		//I(Xm+1) = I(Xm) + k*( T(Xm+1+n) - T(Xm-n) )
-		float intensity = prevI + weight * (noiseTexture[pLeapFwdN.x][pLeapFwdN.y] - 
-											noiseTexture[pLeapBwdN.x][pLeapBwdN.y]); //Interpolering av textur verdi?		
+		float intensity = prevI + weight * (noiseTexture[pLeapFwdN.x*dataToPixel][pLeapFwdN.y*dataToPixel] -
+											noiseTexture[pLeapBwdN.x*dataToPixel][pLeapBwdN.y*dataToPixel]);
 		
-		outputImage[p.x][p.y] += intensity;
-		contributors[p.x][p.y]++; //Should expect this is needed?
+		outputImage[p.x*dataToPixel][p.y*dataToPixel] += intensity;
+		contributors[p.x*dataToPixel][p.y*dataToPixel]++; //Should expect this is needed?
 		
 		prevI = intensity;
 	}
@@ -370,11 +370,11 @@ void convolutionFwdAndBwd(float startI, Streamline stream, float weightLUT,
 		pLeapFwdN = (M-1 > m1) ? streamForward[M-1 - m1] : streamStart;
 		
 		//I(Xm-1) = I(Xm) + k*( T(Xm-1-n) - T(Xm+n) )
-		float intensity = prevI + weight * (noiseTexture[pLeapBwdN.x][pLeapBwdN.y] + 
-											noiseTexture[pLeapFwdN.x][pLeapFwdN.y]);
+		float intensity = prevI + weight * (noiseTexture[pLeapBwdN.x*dataToPixel][pLeapBwdN.y*dataToPixel] +
+											noiseTexture[pLeapFwdN.x*dataToPixel][pLeapFwdN.y*dataToPixel]);
 		
-		outputImage[p.x][p.y] += intensity;
-		contributors[p.x][p.y]++; //Should expect this is needed?
+		outputImage[p.x*dataToPixel][p.y*dataToPixel] += intensity;
+		contributors[p.y*dataToPixel][p.y*dataToPixel]++; //Should expect this is needed?
 		
 		prevI = intensity;
 	}
@@ -382,8 +382,8 @@ void convolutionFwdAndBwd(float startI, Streamline stream, float weightLUT,
 //Loop for LIC
 void doLICLoop(ReadData &dataset, SDLRenderer &renderer){
 	//Run variables:
-	int squareRes = 500;
-	int streamLength = squareRes * 0.20; //Fast LIC supposed to used 1/10 of 2 * resolution length
+	int squareRes = renderer.SCREEN_HEIGHT;
+	int streamLength = squareRes*0.2; //Fast LIC supposed to used 1/10 of 2 * resolution length
 	bool bidirectional = true;
 	float stepSize = 0.5;
 	INTEGRATION_METHOD inter = EULER;
@@ -395,46 +395,44 @@ void doLICLoop(ReadData &dataset, SDLRenderer &renderer){
 	
 	//Variables
 	float weightLUT = 1; //We only use a simple box filter for now
+	float pixelToData = (float)dataset.getHeight()/renderer.SCREEN_HEIGHT;
+	float dataToPixel = renderer.SCREEN_HEIGHT/(float)dataset.getHeight();
 	
 	//Fast LIC counters
 	int maxContributors = 10;
 	vector<vector<int> > contributors(squareRes, vector<int>(squareRes, 0));
-	
 	//Loop
 	for(int x = 0; x < squareRes; x++){
-		fprintf(stderr, "x:%d", x);
+		fprintf(stderr, "x:%d\n", x);
 		for(int y = 0; y < squareRes; y++){
 			if(contributors[x][y] >= maxContributors){
 				continue;
 			}
 			
 			//Find streamline for current point
-			Streamline stream(x, y, streamLength, bidirectional, stepSize, inter, dataset);
-			if(stream.isCriticalPoint()){
-				outputImage[x][y] = 0;
-				contributors[x][y] = maxContributors;
+			Streamline stream(x*pixelToData, y*pixelToData, streamLength, bidirectional, stepSize, inter, dataset);
+			if(!stream.getStartPoint().isValid){
 				continue;
 			}
 			
 			//Fast LIC, convolves both for current, backwards and forwards
 			//First start point of the streamline, uses the entire streamline
 			float intensity = convolutionStartPoint(stream, weightLUT, contributors, 
-				noiseTexture, outputImage);
+				noiseTexture, outputImage, dataToPixel);
 				
 			//Then forwards and backwards, only halfway up and down
 			convolutionFwdAndBwd(intensity, stream, weightLUT, contributors, noiseTexture, 
-				outputImage);
+				outputImage, dataToPixel);
 			}
 		}
-	float scaler = renderer.SCREEN_HEIGHT/(float)dataset.getHeight();
 	//Normalize the values and paint
 	for(int x = 0; x < squareRes; x++){
 		for(int y = 0; y < squareRes; y++){
 			outputImage[x][y] /= contributors[x][y];
 			
 			int c = (int) (outputImage[x][y]*255);
-			renderer.PutPixel32_nolock(renderer.getMainSurface(), x*scaler, y*scaler, renderer.RGBA2INT(c,c,c,255));
-			renderer.PutPixel32_nolock(renderer.getMainSurface(), (x*scaler)+1, (y*scaler)+1, renderer.RGBA2INT(c, c, c, 255));
+			renderer.PutPixel32_nolock(renderer.getMainSurface(), x, y, renderer.RGBA2INT(c,c,c,255));
+			//renderer.PutPixel32_nolock(renderer.getMainSurface(), (x*scaler)+1, (y*scaler)+1, renderer.RGBA2INT(c, c, c, 255));
 		}
 	}
 }
