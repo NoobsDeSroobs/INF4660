@@ -32,15 +32,52 @@ void convolutionFwdAndBwd(float startI, Streamline stream, float weightLUT,
 void doLICLoop(ReadData &dataset, SDLRenderer &renderer, int squareRes, int streamLength, 
 			   bool bidirectional, float stepSize, INTEGRATION_METHOD inter);
 
-const static string imgFileName = "M10x10RK50S.bmp";
+const static string imgFileName = "M10x10RK500S.bmp";
+
+void paintCriticalTOBlack(ReadData &data, SDLRenderer &renderer){
+	float dataToPixel = renderer.SCREEN_HEIGHT/data.getHeight();
+	for (int x = 0; x < data.getWidth(); ++x) {
+		for (int y = 0; y < data.getHeight(); ++y) {
+			if(data.getVector(x, y).length() == 0){
+				renderer.PutPixel32_nolock(renderer.getMainSurface(), x*dataToPixel, y*dataToPixel, renderer.RGBA2INT(0, 0, 0, 255));
+				renderer.PutPixel32_nolock(renderer.getMainSurface(), (x*dataToPixel)+1, (y*dataToPixel)+1, renderer.RGBA2INT(0, 0, 0, 255));
+			}
+		}
+	}
+
+}
+
+void calculate10X10StreamLine(ReadData &data, SDLRenderer &renderer){
+	int length = 500;
+
+	//282, 382
+
+	int stride = data.getHeight()/10;
+	float dataToPixelCoord = renderer.SCREEN_HEIGHT/(float)data.getHeight();
+	for (int y = 0; y < data.getHeight(); y = y + stride) {
+		for (int x = 0; x < data.getHeight(); x = x + stride) {
+			Streamline stream(x, y, length, false, 0.25, RK, data);
+			vector<WMpoint> curve = stream.getCurvePoints();
+			fprintf(stderr, "Seed x: %d, y: %d\n", x, y);
+			if(curve.size() > 10 && !stream.isCriticalPoint()){
+				for (uint var = 0; var < curve.size(); ++var) {
+					//fprintf(stderr, "CurvePoint %d: <%f, %f>\n", var, curve[var].x, curve[var].y);
+					curve[var].x = curve[var].x*dataToPixelCoord;
+					curve[var].y = curve[var].y*dataToPixelCoord;
+				}
+				renderer.drawLine(curve);
+			}
+		}
+	}
+}
 
 void calculateRandomStreamLine(ReadData &data, SDLRenderer &renderer){
-	int length = 50;
+	int length = 500;
 	
 	//282, 382
 	
 	int stride = data.getHeight()/10;
-	float dataToPixelCoord = renderer.SCREEN_HEIGHT/data.getHeight();
+	float dataToPixelCoord = renderer.SCREEN_HEIGHT/(float)data.getHeight();
 	for (int y = 0; y < data.getHeight(); y = y + stride) {
 		for (int x = 0; x < data.getHeight(); x = x + stride) {
 			Streamline stream(x, y, length, false, 0.25, RK, data);
@@ -126,7 +163,8 @@ int main() {
 			if(event.type == SDL_KEYDOWN){
 				switch( event.key.keysym.sym ){
 				  case SDLK_DOWN:
-					calculateRandomStreamLine(isabelData, renderer);
+					  paintCriticalTOBlack(metsimData, renderer);
+					calculate10X10StreamLine(metsimData, renderer);
 					//drawStreamLines(isabellData, noiseImageRenderer);
 					//noiseImageRenderer.renderToScreen();
 					break;
@@ -420,14 +458,15 @@ void doLICLoop(ReadData &dataset, SDLRenderer &renderer, int squareRes, int stre
 				outputImage);
 			}
 		}
-	
+	float scaler = renderer.SCREEN_HEIGHT/(float)dataset.getHeight();
 	//Normalize the values and paint
 	for(int x = 0; x < squareRes; x++){
 		for(int y = 0; y < squareRes; y++){
 			outputImage[x][y] /= contributors[x][y];
 			
 			int c = (int) (outputImage[x][y]*255);
-			renderer.PutPixel32_nolock(renderer.getMainSurface(), x, y, renderer.RGBA2INT(c,c,c,255));
+			renderer.PutPixel32_nolock(renderer.getMainSurface(), x*scaler, y*scaler, renderer.RGBA2INT(c,c,c,255));
+			renderer.PutPixel32_nolock(renderer.getMainSurface(), (x*scaler)+1, (y*scaler)+1, renderer.RGBA2INT(c, c, c, 255));
 		}
 	}
 }
