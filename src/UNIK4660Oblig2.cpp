@@ -19,6 +19,7 @@
 #include <vector>
 #include <ctime>
 #include <unistd.h>
+#include <string>
 using namespace std;
 
 void drawAllArrows(ReadData &data, SDLRenderer& renderer);
@@ -98,54 +99,127 @@ void calculateRandomStreamLine(ReadData &data, SDLRenderer &renderer){
 void completeRun(ReadData &dataset1, ReadData &dataset2, SDLRenderer &renderer, int squareRes, int streamLength, 
 				 bool bidirectional, float stepSize, INTEGRATION_METHOD inter){
 	clock_t begin_time;
-	
+	//squareRes has to be set in main()
 	//------------------------------------
-	//Run1 - Isabel
-	streamLength = squareRes * 0.20; bidirectional = true; 
-	stepSize = 0.5f; inter = EULER;
+	fprintf(stderr, "Starting on Isabel");
+	//Run1 - Isabel, Euler, dynamic length
+	streamLength = squareRes * 0.20;
+	inter = EULER;
+	renderer.clear(); 
+	
+	begin_time = clock();
+	doLICLoop(dataset1, renderer, squareRes, streamLength, bidirectional, stepSize, inter);
+	float timeSpent = float(clock() - begin_time) / CLOCKS_PER_SEC;
+	string fileName = "Isabel-Euler_DL_" + to_string(squareRes) + "_" + to_string(timeSpent) + ".bmp";
+	SDL_SaveBMP(renderer.getMainSurface(), fileName.c_str());
+	
+	fprintf(stderr, "Run 1, Size %d\n", squareRes);
+	//------------------------------------
+	//Run2 - Isabel, RK, dynamic length
+	streamLength = squareRes * 0.20;
+	inter = RK;
+	renderer.clear(); 
+	
+	begin_time = clock();
+	doLICLoop(dataset1, renderer, squareRes, streamLength, bidirectional, stepSize, inter);
+	timeSpent = float(clock() - begin_time) / CLOCKS_PER_SEC;
+	fileName = "Isabel-RK_DL_" + to_string(squareRes) + "_" + to_string(timeSpent) + ".bmp";
+	SDL_SaveBMP(renderer.getMainSurface(), fileName.c_str());
+	
+	fprintf(stderr, "Run 2, Size %d\n", squareRes);
+	//------------------------------------
+	//Run3 - Isabel, RK, length 100
+	streamLength = 100;
+	inter = RK;
+	renderer.clear(); 
+	
+	begin_time = clock();
+	doLICLoop(dataset1, renderer, squareRes, streamLength, bidirectional, stepSize, inter);
+	timeSpent = float(clock() - begin_time) / CLOCKS_PER_SEC;
+	fileName = "Isabel-RK_100L_" + to_string(squareRes) + "_" + to_string(timeSpent) + ".bmp";
+	SDL_SaveBMP(renderer.getMainSurface(), fileName.c_str());
+	
+	fprintf(stderr, "Run 3, Size %d\n", squareRes);
+	//------------------------------------
+	//Run4 - Isabel, RK, length 400
+	streamLength = 100;
+	inter = RK;
+	renderer.clear(); 
+	
+	begin_time = clock();
+	doLICLoop(dataset1, renderer, squareRes, streamLength, bidirectional, stepSize, inter);
+	timeSpent = float(clock() - begin_time) / CLOCKS_PER_SEC;
+	fileName = "Isabel-RK_400L_" + to_string(squareRes) + "_" + to_string(timeSpent) + ".bmp";
+	SDL_SaveBMP(renderer.getMainSurface(), fileName.c_str());
+	
+	fprintf(stderr, "Run 4, Size %d\n", squareRes);
+	
+	
+	
+	
+	fprintf(stderr, "Starting on Metsim");
+	//------------------------------------
+	//Run5 - Metsim, Euler, dynamic length
+	streamLength = squareRes * 0.20;
+	inter = EULER;
 	renderer.clear(); 
 	
 	begin_time = clock();
 	doLICLoop(dataset2, renderer, squareRes, streamLength, bidirectional, stepSize, inter);
-	float timeSpent = float(clock() - begin_time) / CLOCKS_PER_SEC;
-	string fileName = "Isabel-Euler_DLength_" + to_string(timeSpent) + ".bmp";
-	//SDL_SaveBMP(renderer.getMainSurface(), fileName.c_str());
-	
-	renderer.renderToScreen();
-	
-	
+	timeSpent = float(clock() - begin_time) / CLOCKS_PER_SEC;
+	fileName = "Metsim-Euler_DL_" + to_string(squareRes) + "_" + to_string(timeSpent) + ".bmp";
+	SDL_SaveBMP(renderer.getMainSurface(), fileName.c_str());
+	fprintf(stderr, "Run 5, Size %d\n", squareRes);
 	
 	//------------------------------------
-	//Run2 - Isabel
+	//Run6 - Metsim, RK, dynamic length
+	streamLength = squareRes * 0.20;
+	inter = RK;
+	renderer.clear(); 
 	
+	begin_time = clock();
+	doLICLoop(dataset2, renderer, squareRes, streamLength, bidirectional, stepSize, inter);
+	timeSpent = float(clock() - begin_time) / CLOCKS_PER_SEC;
+	fileName = "Metsim-RK_DL_" + to_string(squareRes) + "_" + to_string(timeSpent) + ".bmp";
+	SDL_SaveBMP(renderer.getMainSurface(), fileName.c_str());
+	
+	fprintf(stderr, "Run 6, Size %d\n", squareRes);
 	//------------------------------------
-	//Run3 - Isabel
+	//Run7 - Metsim, RK, length 100
+	streamLength = squareRes * 0.20;
+	inter = RK;
+	renderer.clear(); 
 	
+	begin_time = clock();
+	doLICLoop(dataset2, renderer, squareRes, streamLength, bidirectional, stepSize, inter);
+	timeSpent = float(clock() - begin_time) / CLOCKS_PER_SEC;
+	fileName = "Metsim-RK_100L_" + to_string(squareRes) + "_" + to_string(timeSpent) + ".bmp";
+	SDL_SaveBMP(renderer.getMainSurface(), fileName.c_str());
+	
+	fprintf(stderr, "Run 7, Size %d\n", squareRes);
 	//------------------------------------
-	//Run4 - Isabel
+	//Run8 - Metsim, RK, length 400
+	streamLength = squareRes * 0.20;
+	inter = RK;
+	renderer.clear(); 
 	
+	begin_time = clock();
+	doLICLoop(dataset2, renderer, squareRes, streamLength, bidirectional, stepSize, inter);
+	timeSpent = float(clock() - begin_time) / CLOCKS_PER_SEC;
+	fileName = "Metsim-RK_400L_" + to_string(squareRes) + "_" + to_string(timeSpent) + ".bmp";
+	SDL_SaveBMP(renderer.getMainSurface(), fileName.c_str());
 	
-	//------------------------------------
-	//Run5 - Metsim - Euler
-	
-	//------------------------------------
-	//Run6 - Metsim - RK
-	
-	//------------------------------------
-	//Run7 - Metsim - Length / 2 - Euler
-	
-	//------------------------------------
-	//Run7 - Metsim - Length * 2 - Euler
+	fprintf(stderr, "Run 8, Size %d\n", squareRes);
 }
 
 //This system is LITTLE ENDIAN!!!!
 int main() {
 	//Run variables:
-	int squareRes = 127*2;
+	int squareRes = 1000;//127*2;
 	int streamLength = squareRes * 0.20; //Fast LIC supposed to used 1/10 of 2 * resolution length
 	bool bidirectional = true;
-	float stepSize = 0.25;
-	INTEGRATION_METHOD inter = EULER;
+	float stepSize = 0.25f;
+	INTEGRATION_METHOD inter = RK;
 	
 	SDLRenderer renderer(squareRes, squareRes);
 	renderer.setupSDLWindow();
@@ -179,7 +253,7 @@ int main() {
 			if(event.type == SDL_KEYDOWN){
 				switch( event.key.keysym.sym ){
 				  case SDLK_DOWN:
-					  paintCriticalTOBlack(metsimData, renderer);
+					paintCriticalTOBlack(metsimData, renderer);
 					calculate10X10StreamLine(metsimData, renderer);
 					//drawStreamLines(isabellData, noiseImageRenderer);
 					//noiseImageRenderer.renderToScreen();
@@ -364,30 +438,29 @@ void createNoiseTexture(int width, int height, vector<vector<float>> &img){
 float convolutionStartPoint(Streamline &stream, float weightLUT, 
 						   vector<vector<int> > &contributors, 
 						   vector<vector<float> > const &noiseTexture,
-						   vector<vector<float> > &outputImage){
+						   vector<vector<float> > &outputImage, float dataToPixel){
 	
 	float weightAccumulator = 0.0;
 	float texAccumulator = 0.0;
 	float pointWeight = weightLUT;
-	
 	//Build accumulators
 	for(auto &p : stream.getCurvePoints()){
 		weightAccumulator += pointWeight; 
-		texAccumulator += noiseTexture[p.x][p.y] * pointWeight;
+		texAccumulator += noiseTexture[p.x*dataToPixel][p.y*dataToPixel] * pointWeight;
 	}
 	
 	//Set intensity
 	float intensity = texAccumulator / weightAccumulator; //Averages it
 	WMpoint p = stream.getStartPoint();
-	outputImage[p.x][p.y] += intensity;	
-	contributors[p.x][p.y]++;
+	outputImage[p.x*dataToPixel][p.y*dataToPixel] += intensity;
+	contributors[p.x*dataToPixel][p.y*dataToPixel]++;
 	
 	return intensity;
 }
 void convolutionFwdAndBwd(float startI, Streamline stream, float weightLUT,
 						  vector<vector<int> > &contributors, 
 						  vector<vector<float> > const &noiseTexture,
-						  vector<vector<float> > &outputImage){
+						  vector<vector<float> > &outputImage, float dataToPixel){
 	float prevI;
 	WMpoint streamStart = stream.getStartPoint();
 	vector<WMpoint> streamForward = stream.getCurveForwardPoints();
@@ -407,12 +480,13 @@ void convolutionFwdAndBwd(float startI, Streamline stream, float weightLUT,
 		pLeapBwdN = (M-1 > m1) ? streamBackwards[M-1 - m1] : streamStart;
 		
 		//I(Xm+1) = I(Xm) + k*( T(Xm+1+n) - T(Xm-n) )
-		float intensity = prevI + weight * (noiseTexture[pLeapFwdN.x][pLeapFwdN.y] - 
-											noiseTexture[pLeapBwdN.x][pLeapBwdN.y]); //Interpolering av textur verdi?		
+		float intensity = prevI + weight * (noiseTexture[pLeapFwdN.x*dataToPixel][pLeapFwdN.y*dataToPixel] -
+											noiseTexture[pLeapBwdN.x*dataToPixel][pLeapBwdN.y*dataToPixel]);
 		
-		outputImage[p.x][p.y] += intensity;
-		contributors[p.x][p.y]++; //Should expect this is needed?
-		
+		if(contributors[p.x*dataToPixel][p.y*dataToPixel] > 10){
+			outputImage[p.x*dataToPixel][p.y*dataToPixel] += intensity;
+			contributors[p.x*dataToPixel][p.y*dataToPixel]++; //Should expect this is needed?
+		}
 		prevI = intensity;
 	}
 	
@@ -424,16 +498,18 @@ void convolutionFwdAndBwd(float startI, Streamline stream, float weightLUT,
 		pLeapFwdN = (M-1 > m1) ? streamForward[M-1 - m1] : streamStart;
 		
 		//I(Xm-1) = I(Xm) + k*( T(Xm-1-n) - T(Xm+n) )
-		float intensity = prevI + weight * (noiseTexture[pLeapBwdN.x][pLeapBwdN.y] + 
-											noiseTexture[pLeapFwdN.x][pLeapFwdN.y]);
+		float intensity = prevI + weight * (noiseTexture[pLeapBwdN.x*dataToPixel][pLeapBwdN.y*dataToPixel] +
+											noiseTexture[pLeapFwdN.x*dataToPixel][pLeapFwdN.y*dataToPixel]);
 		
-		outputImage[p.x][p.y] += intensity;
-		contributors[p.x][p.y]++; //Should expect this is needed?
-		
+		if(contributors[p.x*dataToPixel][p.y*dataToPixel] > 10){
+			outputImage[p.x*dataToPixel][p.y*dataToPixel] += intensity;
+			contributors[p.x*dataToPixel][p.y*dataToPixel]++; //Should expect this is needed?
+		}
 		prevI = intensity;
 	}
 }
 //Loop for LIC
+
 void doLICLoop(ReadData &dataset, SDLRenderer &renderer, int squareRes, int streamLength, 
 			   bool bidirectional, float stepSize, INTEGRATION_METHOD inter){
 	//Create noise and output image
@@ -443,41 +519,39 @@ void doLICLoop(ReadData &dataset, SDLRenderer &renderer, int squareRes, int stre
 	
 	//Variables
 	float weightLUT = 1; //We only use a simple box filter for now
-	float pixelToData = float(dataset.getHeight() / renderer.SCREEN_HEIGHT);
+	float pixelToData = (float)dataset.getHeight()/(float)renderer.SCREEN_HEIGHT;
+	float dataToPixel = (float)renderer.SCREEN_HEIGHT/(float)dataset.getHeight();
 	stepSize = stepSize * pixelToData;
 	
 	//Fast LIC counters
 	int maxContributors = 10;
 	vector<vector<int> > contributors(squareRes, vector<int>(squareRes, 0));
-	
 	//Loop
 	for(int x = 0; x < squareRes; x++){
-		fprintf(stderr, "x:%d", x);
+		//fprintf(stderr, "x:%d\n", x);
 		for(int y = 0; y < squareRes; y++){
 			if(contributors[x][y] >= maxContributors){
 				continue;
 			}
 			
 			//Find streamline for current point
-			Streamline stream(x*pixelToData, y*pixelToData, streamLength, bidirectional, 
-							  stepSize, inter, dataset);
-			if(!stream.getStartPoint().isValid){
+			Streamline stream(x*pixelToData, y*pixelToData, streamLength, bidirectional, stepSize, inter, dataset);
+			if(stream.getCurvePoints().size() <= 1){
 				outputImage[x][y] = 0;
-				contributors[x][y] = maxContributors;
+				//contributors[x][y] = maxContributors;
 				continue;
 			}
 			
 			//Fast LIC, convolves both for current, backwards and forwards
 			//First start point of the streamline, uses the entire streamline
 			float intensity = convolutionStartPoint(stream, weightLUT, contributors, 
-													noiseTexture, outputImage);
+													noiseTexture, outputImage, dataToPixel);
 				
 			//Then forwards and backwards, only halfway up and down
-			convolutionFwdAndBwd(intensity, stream, weightLUT, contributors, 
-								 noiseTexture, outputImage);
-			}
+			convolutionFwdAndBwd(intensity, stream, weightLUT, contributors, noiseTexture, outputImage, dataToPixel);
 		}
-	
+	}
+		
 	//Normalize the values and paint
 	for(int x = 0; x < squareRes; x++){
 		for(int y = 0; y < squareRes; y++){

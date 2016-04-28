@@ -17,6 +17,9 @@ WMpoint Integrations::ForwardEuler(WMpoint u_prev, ReadData &reader, float stepS
 	u.x = u_prev.x + stepSize * vecNorm.x;
 	u.y = u_prev.y + stepSize * vecNorm.y;
 	
+	if(!verifyPointExistence(u, reader)){
+		u.isValid = false;
+	}
 	return u;
 }
 /*
@@ -61,7 +64,6 @@ WMpoint Integrations::RungeKutta(WMpoint u_prev, ReadData &reader, float stepSiz
 	
 	return u;
 }*/
-
 
 WMpoint Integrations::RungeKutta(WMpoint u_prev, ReadData &reader, float stepSize){
 	vecData vDatak1, vDatak2, vDatak3, vDatak4;
@@ -111,7 +113,18 @@ WMpoint Integrations::RungeKutta(WMpoint u_prev, ReadData &reader, float stepSiz
 	T4y = (k1y + 2*k2y + 2*k3y + k4y)/6;
 
 	u = WMpoint(u_prev.x + T4x, u_prev.y + T4y);
+	if(!verifyPointExistence(u, reader)){
+		u.isValid = false;
+	}
 	return u;
+}
+
+bool Integrations::verifyPointExistence(WMpoint p, ReadData &reader){
+	if(p.x < 0 || p.y < 0 || p.x >= reader.getHeight() || p.y >= reader.getWidth()){
+		
+		return false;
+	}
+	return true;
 }
 
 bool Integrations::findVectorDataForPoint(WMpoint dataPoint, vecData &returnVec, ReadData &reader){
@@ -190,7 +203,7 @@ bool Integrations::BilinearInterpolation(vecData &returnVec, float x1, float x2,
 	returnVec.x = calcComponent(Q11.x, Q12.x, Q21.x, Q22.x, x1, x2, y1, y2, x, y);
 	returnVec.y = calcComponent(Q11.y, Q12.y, Q21.y, Q22.y, x1, x2, y1, y2, x, y);
 	
-	//Checks if it is a crical point
+	//Checks if it is a critical point
 	if(returnVec.x == 0 && returnVec.y == 0){
 		return false;
 	}
