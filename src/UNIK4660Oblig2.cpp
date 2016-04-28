@@ -17,6 +17,7 @@
 #include <cmath>
 #include <queue>
 #include <vector>
+#include <ctime>
 #include <unistd.h>
 using namespace std;
 
@@ -28,7 +29,8 @@ float convolutionStartPoint(Streamline &stream, float weightLUT,
 void convolutionFwdAndBwd(float startI, Streamline stream, float weightLUT,
 			vector<vector<int> > &contributors, vector<vector<float> > const &noiseTexture,
 			vector<vector<float> > &outputImage);
-void doLICLoop(ReadData &dataset, SDLRenderer &renderer);
+void doLICLoop(ReadData &dataset, SDLRenderer &renderer, int squareRes, int streamLength, 
+			   bool bidirectional, float stepSize, INTEGRATION_METHOD inter);
 
 const static string imgFileName = "M10x10RK50S.bmp";
 
@@ -56,23 +58,53 @@ void calculateRandomStreamLine(ReadData &data, SDLRenderer &renderer){
 	}
 }
 
+void completeRun(ReadData &dataset1, ReadData &dataset2, SDLRenderer &renderer, int squareRes, int streamLength, 
+				 bool bidirectional, float stepSize, INTEGRATION_METHOD inter){
+	clock_t begin_time;
+	
+	//------------------------------------
+	//Run1 - Isabel
+	streamLength = squareRes * 0.20; bidirectional = true; 
+	stepSize = 0.25; inter = EULER;
+	renderer.clear(); 
+	
+	begin_time = clock();
+	doLICLoop(dataset2, renderer, squareRes, streamLength, bidirectional, stepSize, inter);
+	float timeSpent = float(clock() - begin_time) / CLOCKS_PER_SEC;
+	string fileName = "Isabel-Euler_DLength_" + to_string(timeSpent) + ".bmp";
+	SDL_SaveBMP(renderer.getMainSurface(), fileName.c_str());
+	
+	//------------------------------------
+	//Run2 - Isabel
+	
+	//------------------------------------
+	//Run3 - Isabel
+	
+	//------------------------------------
+	//Run4 - Isabel
+	
+}
 
 //This system is LITTLE ENDIAN!!!!
 int main() {
-	SDLRenderer renderer(1000, 1000);
-	renderer.setupSDLWindow();
-	//SDLRenderer noiseImageRenderer(renderer.SCREEN_WIDTH, renderer.SCREEN_HEIGHT);
-	//noiseImageRenderer.setupSDLWindow("Noise Image", true);
-	//renderer.SetTexture("/home/wilhelm/Downloads/arrow.bmp");
-
-	string isabellPath = "/home/noobsdesroobs/Downloads/isabel_2d.h5";
-	string metsimPath = "/home/noobsdesroobs/Downloads/metsim1_2d.h5";
+	//Run variables:
+	int squareRes = 500;
+	int streamLength = squareRes * 0.20; //Fast LIC supposed to used 1/10 of 2 * resolution length
+	bool bidirectional = true;
+	float stepSize = 0.25;
+	INTEGRATION_METHOD inter = EULER;
 	
-	string asciiNameIsabel = "src/Data/ascii_isabel";
-	string asciiNameMetsim = "src/Data/ascii_metsim";
+	SDLRenderer renderer(squareRes, squareRes);
+	renderer.setupSDLWindow();
+
+	string isabelPath = "../Data/isabel_2d.h5";
+	string metsimPath = "../Data/metsim1_2d.h5";
+	
+	string asciiNameIsabel = "../Data/ascii_isabel";
+	string asciiNameMetsim = "../Data/ascii_metsim";
 
 	ReadData isabelData;
-	//isabelData.readFromHDF5File(isabellPath, true);
+	//isabelData.readFromHDF5File(isabelPath, true);
 	isabelData.readFromTextFile(asciiNameIsabel, 500, 500, true);
 	ReadData metsimData;
 	//metsimData.readFromHDF5File(metsimPath, false);
@@ -120,18 +152,24 @@ int main() {
 					
 					case SDLK_i:
 						renderer.clear();
-						doLICLoop(isabelData, renderer);
+						doLICLoop(isabelData, renderer, squareRes, streamLength, bidirectional,
+								  stepSize, inter);
 						renderer.renderToScreen();
 						SDL_SaveBMP(renderer.getMainSurface(), "Isabel.bmp");
 						break;
+						
 					case SDLK_m:
 						renderer.clear();
-						doLICLoop(metsimData, renderer);
+						doLICLoop(metsimData, renderer, squareRes, streamLength, bidirectional,
+								  stepSize, inter);
 						renderer.renderToScreen();
 						SDL_SaveBMP(renderer.getMainSurface(), "Metsim.bmp");
+						break;
 					
-					break;
-
+					case SDLK_q:
+						completeRun(isabelData, metsimData, renderer, squareRes, 
+									streamLength, bidirectional, stepSize, inter);
+						break;
 
 					default:
 						break;
@@ -342,14 +380,8 @@ void convolutionFwdAndBwd(float startI, Streamline stream, float weightLUT,
 	}
 }
 //Loop for LIC
-void doLICLoop(ReadData &dataset, SDLRenderer &renderer){
-	//Run variables:
-	int squareRes = 500;
-	int streamLength = squareRes * 0.20; //Fast LIC supposed to used 1/10 of 2 * resolution length
-	bool bidirectional = true;
-	float stepSize = 0.5;
-	INTEGRATION_METHOD inter = EULER;
-	
+void doLICLoop(ReadData &dataset, SDLRenderer &renderer, int squareRes, int streamLength, 
+			   bool bidirectional, float stepSize, INTEGRATION_METHOD inter){
 	//Create noise and output image
 	vector<vector<float> > outputImage(squareRes, vector<float>(squareRes, 0));
 	vector<vector<float> > noiseTexture(squareRes, vector<float>(squareRes, 0));
