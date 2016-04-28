@@ -115,12 +115,6 @@ WMpoint Integrations::RungeKutta(WMpoint u_prev, ReadData &reader, float stepSiz
 }
 
 bool Integrations::findVectorDataForPoint(WMpoint dataPoint, vecData &returnVec, ReadData &reader){
-	//Checks if it exists on the vector grid
-	if((dataPoint.x - (int)dataPoint.x == 0.0f) && (dataPoint.y - (int)dataPoint.y) == 0.0f){
-		returnVec = reader.getVector((int) dataPoint.x, (int) dataPoint.y);
-		returnVec.trueData = true;
-		return true;
-	}
 	//Otherwise they need to be interpolated
 	int x1 = (int)dataPoint.x;
 	int x2 = (int)dataPoint.x + 1;

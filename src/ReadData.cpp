@@ -129,7 +129,7 @@ void ReadData::readFromTextFile(std::string fileName, int rows, int columns, boo
 
 velVector ReadData::getVector(int x, int y){
 	
-	if(x < 0 || x >= getWidth() || y < 0 || y >= getWidth() ){
+	if(x < 0 || x >= getWidth() || y < 0 || y >= getHeight() ){
 		//fprintf(stderr, "Tried to access data %d, %d which is out of bounds\n", x, y);
 		velVector returner(0, 0);
 		returner.isValid = false;
