@@ -72,11 +72,11 @@ int main() {
 	string asciiNameMetsim = "../Data/ascii_metsim";
 
 	ReadData isabelData;
-	isabelData.readFromHDF5File(isabellPath, true);
-	//isabelData.readFromAscII(asciiNameIsabel, 500, 500);
+	//isabelData.readFromHDF5File(isabellPath, true);
+	isabelData.readFromTextFile(asciiNameIsabel, 500, 500, true);
 	ReadData metsimData;
-	metsimData.readFromHDF5File(metsimPath, false);
-	//metsimData.readFromAscII(asciiNameMetsim, 127, 127);
+	//metsimData.readFromHDF5File(metsimPath, false);
+	metsimData.readFromTextFile(asciiNameMetsim, 127, 127);
 	
 	bool RUNNING = true;
 	/* An SDL_Event */

@@ -20,7 +20,7 @@ class ReadData{
 		void readFromHDF5File(string fileName,  bool transpose = false, string groupName = "Velocity",
 				string compXName = "X-comp", string compYName = "Y-comp");
 		
-		void readFromTextFile(string fileName, int rows, int columns);
+		void readFromTextFile(string fileName, int rows, int columns, bool transpose = false);
 		
 		velVector getVector(int x, int y);
 		
