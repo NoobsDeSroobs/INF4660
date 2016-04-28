@@ -102,14 +102,18 @@ void completeRun(ReadData &dataset1, ReadData &dataset2, SDLRenderer &renderer, 
 	//------------------------------------
 	//Run1 - Isabel
 	streamLength = squareRes * 0.20; bidirectional = true; 
-	stepSize = 0.25; inter = EULER;
+	stepSize = 0.5f; inter = EULER;
 	renderer.clear(); 
 	
 	begin_time = clock();
 	doLICLoop(dataset2, renderer, squareRes, streamLength, bidirectional, stepSize, inter);
 	float timeSpent = float(clock() - begin_time) / CLOCKS_PER_SEC;
 	string fileName = "Isabel-Euler_DLength_" + to_string(timeSpent) + ".bmp";
-	SDL_SaveBMP(renderer.getMainSurface(), fileName.c_str());
+	//SDL_SaveBMP(renderer.getMainSurface(), fileName.c_str());
+	
+	renderer.renderToScreen();
+	
+	
 	
 	//------------------------------------
 	//Run2 - Isabel
@@ -120,12 +124,24 @@ void completeRun(ReadData &dataset1, ReadData &dataset2, SDLRenderer &renderer, 
 	//------------------------------------
 	//Run4 - Isabel
 	
+	
+	//------------------------------------
+	//Run5 - Metsim - Euler
+	
+	//------------------------------------
+	//Run6 - Metsim - RK
+	
+	//------------------------------------
+	//Run7 - Metsim - Length / 2 - Euler
+	
+	//------------------------------------
+	//Run7 - Metsim - Length * 2 - Euler
 }
 
 //This system is LITTLE ENDIAN!!!!
 int main() {
 	//Run variables:
-	int squareRes = 500;
+	int squareRes = 127*2;
 	int streamLength = squareRes * 0.20; //Fast LIC supposed to used 1/10 of 2 * resolution length
 	bool bidirectional = true;
 	float stepSize = 0.25;
@@ -427,6 +443,8 @@ void doLICLoop(ReadData &dataset, SDLRenderer &renderer, int squareRes, int stre
 	
 	//Variables
 	float weightLUT = 1; //We only use a simple box filter for now
+	float pixelToData = float(dataset.getHeight() / renderer.SCREEN_HEIGHT);
+	stepSize = stepSize * pixelToData;
 	
 	//Fast LIC counters
 	int maxContributors = 10;
@@ -441,8 +459,9 @@ void doLICLoop(ReadData &dataset, SDLRenderer &renderer, int squareRes, int stre
 			}
 			
 			//Find streamline for current point
-			Streamline stream(x, y, streamLength, bidirectional, stepSize, inter, dataset);
-			if(stream.isCriticalPoint()){
+			Streamline stream(x*pixelToData, y*pixelToData, streamLength, bidirectional, 
+							  stepSize, inter, dataset);
+			if(!stream.getStartPoint().isValid){
 				outputImage[x][y] = 0;
 				contributors[x][y] = maxContributors;
 				continue;
@@ -451,22 +470,21 @@ void doLICLoop(ReadData &dataset, SDLRenderer &renderer, int squareRes, int stre
 			//Fast LIC, convolves both for current, backwards and forwards
 			//First start point of the streamline, uses the entire streamline
 			float intensity = convolutionStartPoint(stream, weightLUT, contributors, 
-				noiseTexture, outputImage);
+													noiseTexture, outputImage);
 				
 			//Then forwards and backwards, only halfway up and down
-			convolutionFwdAndBwd(intensity, stream, weightLUT, contributors, noiseTexture, 
-				outputImage);
+			convolutionFwdAndBwd(intensity, stream, weightLUT, contributors, 
+								 noiseTexture, outputImage);
 			}
 		}
-	float scaler = renderer.SCREEN_HEIGHT/(float)dataset.getHeight();
+	
 	//Normalize the values and paint
 	for(int x = 0; x < squareRes; x++){
 		for(int y = 0; y < squareRes; y++){
 			outputImage[x][y] /= contributors[x][y];
 			
 			int c = (int) (outputImage[x][y]*255);
-			renderer.PutPixel32_nolock(renderer.getMainSurface(), x*scaler, y*scaler, renderer.RGBA2INT(c,c,c,255));
-			renderer.PutPixel32_nolock(renderer.getMainSurface(), (x*scaler)+1, (y*scaler)+1, renderer.RGBA2INT(c, c, c, 255));
+			renderer.PutPixel32_nolock(renderer.getMainSurface(), x, y, renderer.RGBA2INT(c,c,c,255));
 		}
 	}
 }

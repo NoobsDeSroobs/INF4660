@@ -115,13 +115,7 @@ WMpoint Integrations::RungeKutta(WMpoint u_prev, ReadData &reader, float stepSiz
 }
 
 bool Integrations::findVectorDataForPoint(WMpoint dataPoint, vecData &returnVec, ReadData &reader){
-	//Checks if it exists on the vector grid
-	if((dataPoint.x - (int)dataPoint.x == 0.0f) && (dataPoint.y - (int)dataPoint.y) == 0.0f){
-		returnVec = reader.getVector((int) dataPoint.x, (int) dataPoint.y);
-		returnVec.trueData = true;
-		return true;
-	}
-	//Otherwise they need to be interpolated
+	//It needs to be interpolated
 	int x1 = (int)dataPoint.x;
 	int x2 = (int)dataPoint.x + 1;
 	int y1 = (int)dataPoint.y;
@@ -187,13 +181,18 @@ bool Integrations::BilinearInterpolation(vecData &returnVec, float x1, float x2,
 	vecData Q22 = reader.getVector(x2, y2);	
 	
 	//Checks if any of the four points are critical points.
-	if( (Q11.x == 0.0 && Q11.y == 0.0) || (Q12.x == 0.0 && Q12.y == 0.0) ||
-		(Q21.x == 0.0 && Q21.y == 0.0) || (Q22.x == 0.0 && Q22.y == 0.0) ){
+	if( (Q11.x == 0.0 && Q11.y == 0.0) && (Q12.x == 0.0 && Q12.y == 0.0) &&
+		(Q21.x == 0.0 && Q21.y == 0.0) && (Q22.x == 0.0 && Q22.y == 0.0) ){
 		return false;
 	}
 	
 	//Calculates the new vector components
 	returnVec.x = calcComponent(Q11.x, Q12.x, Q21.x, Q22.x, x1, x2, y1, y2, x, y);
 	returnVec.y = calcComponent(Q11.y, Q12.y, Q21.y, Q22.y, x1, x2, y1, y2, x, y);
+	
+	//Checks if it is a crical point
+	if(returnVec.x == 0 && returnVec.y == 0){
+		return false;
+	}
 	return true;
 }

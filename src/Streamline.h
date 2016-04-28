@@ -11,7 +11,7 @@ enum INTEGRATION_METHOD {EULER = 0, RK};
 
 class Streamline{
 	public:
-		Streamline(int x, int y, int length, bool biDirectional, float stepSize,
+		Streamline(float x, float y, int length, bool biDirectional, float stepSize,
 				   INTEGRATION_METHOD integration, ReadData &reader);
 		virtual ~Streamline();
 		
