@@ -88,10 +88,10 @@ void ReadData::readFromTextFile(std::string fileName, int rows, int columns, boo
 	int rowCounter = 0; int colCounter = 0;
 	while(xFile >> component){
 		if(transpose){
-			dataXComp[colCounter][rowCounter] = component;
+			dataYComp[colCounter][rowCounter] = component;
 		}
 		else{
-			dataXComp[rowCounter][colCounter] = component;
+			dataYComp[rowCounter][colCounter] = component;
 		}
 		
 		
@@ -107,10 +107,10 @@ void ReadData::readFromTextFile(std::string fileName, int rows, int columns, boo
 	rowCounter = 0; colCounter = 0;
 	while(yFile >> component){
 		if(transpose){
-			dataYComp[colCounter][rowCounter] = component;
+			dataXComp[colCounter][rowCounter] = component;
 		}
 		else{
-			dataYComp[rowCounter][colCounter] = component;
+			dataXComp[rowCounter][colCounter] = component;
 		}
 		
 		colCounter++;

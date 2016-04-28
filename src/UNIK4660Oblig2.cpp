@@ -65,11 +65,11 @@ int main() {
 	//noiseImageRenderer.setupSDLWindow("Noise Image", true);
 	//renderer.SetTexture("/home/wilhelm/Downloads/arrow.bmp");
 
-	string isabellPath = "/home/wilhelm/Downloads/data/isabel_2d.h5";
-	string metsimPath = "/home/wilhelm/Downloads/data/metsim1_2d.h5";
+	string isabellPath = "/home/noobsdesroobs/Downloads/isabel_2d.h5";
+	string metsimPath = "/home/noobsdesroobs/Downloads/metsim1_2d.h5";
 	
-	string asciiNameIsabel = "../Data/ascii_isabel";
-	string asciiNameMetsim = "../Data/ascii_metsim";
+	string asciiNameIsabel = "src/Data/ascii_isabel";
+	string asciiNameMetsim = "src/Data/ascii_metsim";
 
 	ReadData isabelData;
 	//isabelData.readFromHDF5File(isabellPath, true);
@@ -116,13 +116,14 @@ int main() {
 					case SDLK_c:
 						renderer.clear();
 						renderer.renderToScreen();
-					default:
+						break;
 					
 					case SDLK_i:
 						renderer.clear();
 						doLICLoop(isabelData, renderer);
 						renderer.renderToScreen();
 						SDL_SaveBMP(renderer.getMainSurface(), "Isabel.bmp");
+						break;
 					case SDLK_m:
 						renderer.clear();
 						doLICLoop(metsimData, renderer);
@@ -130,6 +131,10 @@ int main() {
 						SDL_SaveBMP(renderer.getMainSurface(), "Metsim.bmp");
 					
 					break;
+
+
+					default:
+						break;
 				 }
 			}
 		}
@@ -140,8 +145,8 @@ int main() {
 }
 
 void drawAllArrows(ReadData &data, SDLRenderer& renderer){
-	float xPixelStep = 5;//renderer.SCREEN_WIDTH/(float)data.getWidth();
-	float yPixelStep = 5;//renderer.SCREEN_HEIGHT/(float)data.getHeight();
+	float xPixelStep = renderer.SCREEN_WIDTH/(float)data.getWidth();
+	float yPixelStep = renderer.SCREEN_HEIGHT/(float)data.getHeight();
 	velVector baseVec(1.0f, 0.0f);
 	renderer.clear();
 	int ctr = 1;
