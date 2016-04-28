@@ -12,8 +12,6 @@ Streamline::Streamline(float x, float y, int length, bool biDirectional, float s
 	this->integration = integration;
 	this->reader = reader;
 	
-
-	criticalPoint = false;
 	calcCurve();
 }
 Streamline::~Streamline(){
@@ -44,7 +42,7 @@ bool Streamline::isCriticalPoint(){
 }
 
 void Streamline::calcCurve(){
-	WMpoint increment;
+	WMpoint increment;	
 	curveForwardPoints.resize(length, WMpoint());
 	if(biDirectional){
 		curveBackwardPoints.resize(length, WMpoint());
@@ -58,7 +56,7 @@ void Streamline::calcCurve(){
 		else{
 			increment = Integrations::RungeKutta(increment, reader, stepSize);
 		}
-		if(!increment.isValid || (increment.x < 0 || increment.y < 0)){
+		if(!increment.isValid){
 			curveForwardPoints.resize(i);
 			break;//End point, do not store more of, or continue this direction
 		}
@@ -74,7 +72,7 @@ void Streamline::calcCurve(){
 			else{
 				increment = Integrations::RungeKutta(increment, reader, -stepSize);
 			}
-			if(!increment.isValid || (increment.x < 0 || increment.y < 0)){
+			if(!increment.isValid){
 				curveBackwardPoints.resize(i);
 				break;//End point, do not store more of, or continue this direction
 			}

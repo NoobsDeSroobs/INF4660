@@ -56,7 +56,7 @@ class Integrations{
 		static WMpoint ForwardEuler(WMpoint u_prev, ReadData &reader, float stepSize);
 		static WMpoint RungeKutta(WMpoint u_prev, ReadData &reader, float stepSize);
 		static bool findVectorDataForPoint(WMpoint dataPoint, vecData &returnVec, ReadData &reader);
-		
+		static bool verifyPointExistence(WMpoint p, ReadData &reader);
 	private:
 		float RKPartial (WMpoint u_prev, ReadData &reader, float stepSize);
 		static vecData interpolateVectorData(int x1, int x2, int y1, int y2, int x, int y,
