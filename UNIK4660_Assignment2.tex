@@ -53,7 +53,6 @@ frame=l,
 \begin{document}
 \maketitle
 In this assignment we are first to visualize two sets of vector fields by their field lines. Secondly, to create a Line Integral Convolution(LIC) implementation and show its functionality on these fields. The vector field are given in the form of two .hdf5 files and are two different hurricane simulations, Isabel and Metsim.
-
 \\
 We are also to implement and compare different integration methods, specifically Forward Euler and Fourth Order Runge-Kutta, and use differently sized convolution kernels. The results are shown and discussed at the end of this report.
 
@@ -107,52 +106,142 @@ Runge-Kutta is a bit more complicated, and where Euler takes the step in one go,
 	\psi_{n+1} =& \psi_n + \frac{k_1}{6} + \frac{k_2}{3} + \frac{k_3}{3} + \frac{k_4}{6}
 \end{align*}
 
-
+\newpage
 \section{Results}
-In this section we show the result of using both the Euler and the Runge-Kutta methods. We also vary the number of iterations to see the difference in computational cost for the integration and required interpolation.
-
-\begin{figure}[ht]
-\centering
-\hspace*{-2.5cm}
-\begin{subfigure}{.7\textwidth}
-  \centering
-  \includegraphics[width=1\linewidth]{beatyIsabel}
-  \caption{A subfigure}
-  \label{fig:sub1}
-\end{subfigure}%
-\begin{subfigure}{.7\textwidth}
-  \centering
-  \includegraphics[width=1\linewidth]{beatyIsabel}
-  \caption{A subfigure}
-  \label{fig:sub2}
-\end{subfigure}
-\caption{A figure with two subfigures}
-\label{fig:test}
-\end{figure}
-
-
-
-\subsection{Forward Euler: FilterVariations}
-
-%\includegraphics[scale=1.0]{PathFileName}
-
-\subsection{4th order Runge-Kutta: FilterVariations}
-
-%\includegraphics[scale=1.0]{PathFileName}
-
-\section{Comparisons and Conclusion}
-
-Unfortunatly, we have a flaw in our algorithm which flipps sections of the vector sets causing our results to differ greatly from the examples provided. This is especially noticable in the visualization of the Metsim dataset, where the vectors are almost all diagonal in contrast with the oval example. In Isabel some of the vectors seem mirrored, but the vortex is still in the, according to the example, correct position. 
 
 \subsection{Streamlines}
-In general the 4th Order Runge Kutta interpolation proved itself to create the smoothest and most beautiful streamlines. Forward Euler had a tendency to rotate its direction more rapidly resulting in sharper turns and more ragged looking streamlines. The two methods we tried were 10x10 evenly spread seedpoints throughout the image and 100 randomly selected seed points. The randomly selected seedpoints usually resulted in worse results with more cluttering when used with the isabel dataset, while due to the specific nature of our metsim dataset it generally performed better. Since evenly spaced seedpoints in a field moving along the diagonal caused most points to follow the same path causing major cluttering and drastically lowered the informative value of the visualization. We used a max streamline length of 500 for the isabela set, while 100 seemed to be appropriate for the metsim set. Chosing a smaller length or a higher length ended up with partial loss of the sense of flow and kluttering, respectivly. In all cases the stepsize was 0.25.
+\begin{figure}[ht]
+	\centering
+	\hspace*{-1.5cm}
+	\begin{subfigure}{.6\textwidth}
+		\centering
+		\includegraphics[width=0.8\linewidth]{Images/I10x10E500S}
+		\caption{Euler}
+		\label{fig:sub1}
+	\end{subfigure}%
+	\begin{subfigure}{.6\textwidth}
+		\centering
+		\includegraphics[width=0.8\linewidth]{Images/I10x10RK500S}
+		\caption{Runge-Kutta}
+		\label{fig:sub2}
+	\end{subfigure}
+	\caption{Isabel: Seedpoints evenly dispersed as a 10x10 grid.}
+	\label{fig:test}
+\end{figure}
+
+\begin{figure}[ht]
+	\centering
+	\hspace*{-1.5cm}
+	\begin{subfigure}{.6\textwidth}
+		\centering
+		\includegraphics[width=0.8\linewidth]{Images/IRandE500S}
+		\caption{Euler}
+		\label{fig:sub1}
+	\end{subfigure}%
+	\begin{subfigure}{.6\textwidth}
+		\centering
+		\includegraphics[width=0.8\linewidth]{Images/IRandRK500S}
+		\caption{Runge-Kutta}
+		\label{fig:sub2}
+	\end{subfigure}
+	\caption{Isabel: 100 randomly generated seedpoints}
+	\label{fig:test}
+\end{figure}
+
+\newpage
+\begin{figure}[ht]
+	\centering
+	\hspace*{-1.5cm}
+	\begin{subfigure}{.6\textwidth}
+		\centering
+		\includegraphics[width=0.8\linewidth]{Images/M10x10E500S}
+		\caption{Euler}
+		\label{fig:sub1}
+	\end{subfigure}%
+	\begin{subfigure}{.6\textwidth}
+		\centering
+		\includegraphics[width=0.8\linewidth]{Images/M10x10RK500S}
+		\caption{Runge-Kutta}
+		\label{fig:sub2}
+	\end{subfigure}
+	\caption{Metsim: Seedpoints evenly dispersed as a 10x10 grid.}
+	\label{fig:test}
+\end{figure}
+\begin{figure}[ht]
+	\centering
+	\hspace*{-1.5cm}
+	\begin{subfigure}{.6\textwidth}
+		\centering
+		\includegraphics[width=0.8\linewidth]{Images/MetRandE200S}
+		\caption{Euler}
+		\label{fig:sub1}
+	\end{subfigure}%
+	\begin{subfigure}{.6\textwidth}
+		\centering
+		\includegraphics[width=0.8\linewidth]{Images/MetRandRK200S}
+		\caption{Runge-Kutta}
+		\label{fig:sub2}
+	\end{subfigure}
+	\caption{Metsim: 100 randomly generated seedpoints}
+	\label{fig:test}
+\end{figure}
+
+\newpage
+\begin{figure}[ht]
+	\centering
+	\hspace*{-1.5cm}
+	\begin{subfigure}{.6\textwidth}
+		\centering
+		\includegraphics[width=0.8\linewidth]{Images/Isabel-Euler_DL_500_212t}
+		\caption{Euler}
+		\label{fig:sub1}
+	\end{subfigure}%
+	\begin{subfigure}{.6\textwidth}
+		\centering
+		\includegraphics[width=0.8\linewidth]{Images/Isabel-RK_DL_500_229t}
+		\caption{Runge-Kutta}
+		\label{fig:sub2}
+	\end{subfigure}
+	\caption{Isabel}
+	\label{fig:test}
+\end{figure}
+\begin{figure}[ht]
+	\centering
+	\hspace*{-1.5cm}
+	\begin{subfigure}{.6\textwidth}
+		\centering
+		\includegraphics[width=0.8\linewidth]{Images/Metsim-Euler_DL_500_51t}
+		\caption{Euler}
+		\label{fig:sub1}
+	\end{subfigure}%
+	\begin{subfigure}{.6\textwidth}
+		\centering
+		\includegraphics[width=0.8\linewidth]{Images/Metsim-RK_DL_500_74t}
+		\caption{Runge-Kutta}
+		\label{fig:sub2}
+	\end{subfigure}
+	\caption{Metsim}
+	\label{fig:test}
+\end{figure}
+
+\newpage
+\section{Comparisons and Conclusion}
+
+Unfortunatly, we have a flaw in our algorithm which flipps sections of the vector sets causing our results to differ greatly from the examples provided. This is especially noticable in the visualization of the Metsim dataset, where the vectors are almost all diagonal in contrast with the oval example. In Isabel some of the vectors seem mirrored, but the vortex seems to be in the correct position. 
+
+\subsection{Streamlines}
+In general the Runge-Kutta method proved itself to create the smoothest streamlines. Forward Euler had a tendency to rotate its direction more rapidly resulting in sharper turns and more ragged looking lines. The randomly selected seed points usually resulted in worse results with more cluttering when used with the Isabel dataset, while due to the specific nature of our Metsim dataset it generally performed better. Since evenly spaced seed points in a field moving along the diagonal caused most points to follow the same path causing major cluttering and drastically lowered the informative value of the visualization. We used a max streamline length of 500 for the Isabel set, while 200 seemed to be appropriate for Metsim. Choosing a smaller or higher length ended up with partial flow loss or increased cluttering, respectively.
 
 \subsection{Line Integral Convolution}
-The Euler integration result ended u
-
+Just like in the streamlines Runge-Kutta creates much smoother curves, but it also creates less distinction between them, slightly lowering the ease of interpreting the results. \\
+In the Isabel set, Euler gives some strange detail in the upper and lower right side of the image. This is not shown when using Runke-Kutta, but we suspect this is an artefact from the vector data read errors.
+\\
+In the Metsim set, the disturbance in the middle is very noticeable when using Euler, compared to the smoother Runge-Kutta.
+\\
+We did experiment with varying the length of the convolution. However, it gave almost no variation in execution time, barely a second longer for each additional hundred points. This is likely because we implemented the fast LIC algorithm, which places a specific limit to how many times a single image pixel can be affected by the convolution. So the extra time spent on there was regained when skipping image pixels in the main loop.
 
 \subsection{Geometric field lines vs LIC}
-The geometric field line visualization gave a good overview, though some detail was lost compared to the LIC. As we did not use any complicated seeding strategies it was almost instantaneous. We still saw the begininng of the spiral in Isabel, but only a slight curve in Metsim. It is likely that with another seeding strategy, we would have gotten better details.
+The geometric field line visualization gave a good overview, though much detail was lost compared to the LIC. As we did not use any complicated seeding strategies it was almost instantaneous. We still saw the begininng of the spiral in Isabel, but only a slight curve in Metsim. It is likely that with another seeding strategy, we would have gotten better details.
 \\
-In contrast, the LIC gave a highly detailed result which were easy to interpret. Though there is a use for both, the quality and ease of interpretation of the LIC makes it superior to the geometric method, when efficiency and speed is not an issue.
+In contrast, the LIC gave a highly detailed result which were easy to interpret. Though there is a use for both, the quality and ease of interpretation of the LIC makes it superior to the geometric method, when calculation time is not an issue.
 \end{document}
